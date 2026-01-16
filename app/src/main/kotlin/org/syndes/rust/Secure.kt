@@ -1,4 +1,4 @@
-package org.syndes.rust
+package org.syndes.kotlincomponents
 
 import android.util.Base64
 import java.nio.charset.StandardCharsets
