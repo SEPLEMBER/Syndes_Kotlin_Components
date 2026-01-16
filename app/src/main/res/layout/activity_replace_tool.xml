@@ -28,7 +28,7 @@
             android:layout_marginBottom="8dp"
             android:backgroundTint="#FFBF00"
             android:textColor="#FFBF00"
-            android:hintTextColor="#BF8F00"
+            android:textColorHint="#BF8F00"
             android:padding="12dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
@@ -41,7 +41,7 @@
             android:layout_marginBottom="8dp"
             android:backgroundTint="#FFBF00"
             android:textColor="#FFBF00"
-            android:hintTextColor="#BF8F00"
+            android:textColorHint="#BF8F00"
             android:padding="12dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
@@ -53,12 +53,11 @@
             android:layout_marginBottom="8dp"
             android:backgroundTint="#FFBF00"
             android:textColor="#FFBF00"
-            android:hintTextColor="#BF8F00"
+            android:textColorHint="#BF8F00"
             android:padding="12dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
-        <!-- Preview-only checkbox (uses id expected by the Kotlin file: cbPreviewOnly) -->
         <CheckBox
             android:id="@+id/cbPreviewOnly"
             android:text="Preview only (show matches before applying)"
