@@ -4,13 +4,13 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.provider.DocumentsContract
 import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.animation.LinearInterpolator
 import android.view.animation.RotateAnimation
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.lifecycleScope
@@ -19,6 +19,7 @@ import kotlinx.coroutines.withContext
 import java.io.BufferedInputStream
 import java.io.InputStream
 import java.nio.charset.Charset
+import kotlin.text.RegexOption
 
 class ReplaceToolActivity : AppCompatActivity() {
 
@@ -33,9 +34,15 @@ class ReplaceToolActivity : AppCompatActivity() {
     private lateinit var btnChoose: Button
     private lateinit var btnReplace: Button
     private lateinit var tvStatus: TextView
+    private lateinit var cbPreviewOnly: CheckBox // <-- add this CheckBox to your activity_replace_tool.xml
 
     // overlay views
     private var overlay: FrameLayout? = null
+
+    // preview / data classes
+    private data class MatchPreview(val lineNumber: Int, val lineText: String, val replacedLine: String)
+    private data class FilePreview(val fileName: String?, val uri: Uri, val matches: List<MatchPreview>)
+    private data class ReplaceResult(val filesModified: Int, val totalReplacements: Int, val previews: List<FilePreview> = emptyList())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,11 +54,11 @@ class ReplaceToolActivity : AppCompatActivity() {
         btnChoose = findViewById(R.id.btnChoose)
         btnReplace = findViewById(R.id.btnReplace)
         tvStatus = findViewById(R.id.tvStatus)
+        cbPreviewOnly = findViewById(R.id.cbPreviewOnly) // ensure this exists in your XML
 
         btnChoose.setOnClickListener {
-            // open SAF folder picker (one-time selection; no persist)
+            // open SAF folder picker (one-time selection; do NOT persist permission)
             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
-            // optional: start at external storage root
             startActivityForResult(intent, REQUEST_TREE)
         }
 
@@ -67,20 +74,56 @@ class ReplaceToolActivity : AppCompatActivity() {
                 Toast.makeText(this, "Please choose a folder with Choose Folder (SAF)", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            val recursive = params.split(Regex("\\s+")).any { it == "-r" }
-            val ignoreCase = params.split(Regex("\\s+")).any { it == "-i" }
-            // start processing
+
+            // parse flags
+            val tokens = params.split(Regex("\\s+")).filter { it.isNotBlank() }
+            val recursive = tokens.any { it == "-r" }
+            val ignoreCase = tokens.any { it == "-i" }
+            val regexMode = tokens.any { it == "-e" }       // treat pattern as regex
+            val wholeWord = tokens.any { it == "-w" }       // match whole words only
+            val showLineNumbers = tokens.any { it == "-n" } // show line numbers in preview
+            val dryRun = tokens.any { it == "--dry-run" }   // don't write changes
+            val previewOnly = cbPreviewOnly.isChecked       // UI preview option
+
+            // start processing (scan or apply depending on preview/dry-run)
             showOverlay()
-            tvStatus.text = "Starting..."
+            tvStatus.text = "Scanning..."
             lifecycleScope.launchWhenStarted {
-                val result = withContext(Dispatchers.IO) {
-                    processReplace(pickedRoot!!, find, replace, recursive, ignoreCase)
+                val scanResult = withContext(Dispatchers.IO) {
+                    processReplace(
+                        pickedRoot!!, find, replace, recursive, ignoreCase,
+                        regexMode, wholeWord, showLineNumbers,
+                        dryRun = dryRun || previewOnly, // if previewOnly -> scanning behaves like dry-run
+                        collectPreview = previewOnly // collect previews for dialog
+                    )
                 }
                 hideOverlay()
-                tvStatus.text = "Done. Files changed: ${result.filesModified}, Replacements: ${result.totalReplacements}"
-                Toast.makeText(this@ReplaceToolActivity,
-                    "Done. Files changed: ${result.filesModified}, Replacements: ${result.totalReplacements}",
-                    Toast.LENGTH_LONG).show()
+
+                if (previewOnly) {
+                    // Show interactive preview dialog (Apply / Cancel)
+                    showPreviewDialog(
+                        scanResult, find, replace, recursive, ignoreCase,
+                        regexMode, wholeWord, showLineNumbers
+                    )
+                } else {
+                    // dry-run or immediate apply
+                    if (dryRun) {
+                        tvStatus.text = "Dry-run. Files that would change: ${scanResult.filesModified}, Replacements: ${scanResult.totalReplacements}"
+                        Toast.makeText(
+                            this@ReplaceToolActivity,
+                            "Dry-run. Files that would change: ${scanResult.filesModified}, Replacements: ${scanResult.totalReplacements}",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    } else {
+                        // apply directly (scanResult here is the actual apply result if collectPreview=false and dryRun=false)
+                        tvStatus.text = "Done. Files changed: ${scanResult.filesModified}, Replacements: ${scanResult.totalReplacements}"
+                        Toast.makeText(
+                            this@ReplaceToolActivity,
+                            "Done. Files changed: ${scanResult.filesModified}, Replacements: ${scanResult.totalReplacements}",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
             }
         }
     }
@@ -98,16 +141,51 @@ class ReplaceToolActivity : AppCompatActivity() {
         }
     }
 
-    private data class ReplaceResult(val filesModified: Int, val totalReplacements: Int)
-
-    private fun processReplace(root: DocumentFile, find: String, replace: String, recursive: Boolean, ignoreCase: Boolean): ReplaceResult {
+    /**
+     * Core replacement function.
+     * - can operate in dryRun (no writes)
+     * - can collect previews (list of file -> sample matches)
+     * - supports flags: regexMode (-e), wholeWord (-w), ignoreCase (-i)
+     * - recursive (-r)
+     * - showLineNumbers influences preview content
+     */
+    private fun processReplace(
+        root: DocumentFile,
+        find: String,
+        replace: String,
+        recursive: Boolean,
+        ignoreCase: Boolean,
+        regexMode: Boolean,
+        wholeWord: Boolean,
+        showLineNumbers: Boolean,
+        dryRun: Boolean,
+        collectPreview: Boolean,
+        previewLimitPerFile: Int = 5
+    ): ReplaceResult {
         var filesModified = 0
         var totalReplacements = 0
+        val previews = mutableListOf<FilePreview>()
 
+        // helper: build regex pattern from flags
+        fun buildPattern(): Regex {
+            val base = if (regexMode) find else Regex.escape(find)
+            val wrapped = if (wholeWord) "\\b(?:$base)\\b" else base
+            val options = mutableSetOf<RegexOption>()
+            if (ignoreCase) options.add(RegexOption.IGNORE_CASE)
+            return if (options.isEmpty()) Regex(wrapped) else Regex(wrapped, options)
+        }
+
+        val pattern = try {
+            buildPattern()
+        } catch (e: Exception) {
+            Log.w("ReplaceTool", "Invalid regex: ${e.message}")
+            return ReplaceResult(0, 0, emptyList())
+        }
+
+        // helpers from your original implementation (kept here)
         fun shouldSkipByMime(mime: String?): Boolean {
             if (mime == null) return false
             val lower = mime.lowercase()
-            // skip images, video, audio, apk, font, zip, etc
             if (lower.startsWith("image/") || lower.startsWith("video/") || lower.startsWith("audio/")) return true
             if (lower.contains("zip") || lower.contains("font") || lower.contains("octet-stream")) return true
             return false
@@ -147,19 +225,42 @@ class ReplaceToolActivity : AppCompatActivity() {
                     }
                 }
 
-                // prepare regex for simple literal replacement (not regex replacement)
-                val pattern = if (ignoreCase) Regex(Regex.escape(find), setOf(RegexOption.IGNORE_CASE)) else Regex(Regex.escape(find))
-                val count = pattern.findAll(text).count()
-                if (count == 0) return
+                // collect per-line previews if needed (or numbering requested)
+                val fileMatches = mutableListOf<MatchPreview>()
+                if (showLineNumbers || collectPreview) {
+                    val lines = text.split("\n")
+                    for ((idx, line) in lines.withIndex()) {
+                        val found = pattern.findAll(line).toList()
+                        if (found.isNotEmpty()) {
+                            val replacedLine = pattern.replace(line, replace)
+                            fileMatches.add(MatchPreview(idx + 1, line, replacedLine))
+                            if (fileMatches.size >= previewLimitPerFile && collectPreview) break
+                        }
+                    }
+                }
 
-                val replaced = pattern.replace(text, replace)
+                // count all occurrences in file
+                val foundCount = pattern.findAll(text).count()
+                if (foundCount == 0 && fileMatches.isEmpty()) return
 
-                // write back
-                val out = contentResolver.openOutputStream(doc.uri, "rwt") ?: return
-                out.use { it.write(replaced.toByteArray(Charsets.UTF_8)) }
+                // if collecting preview, add file entry
+                if (collectPreview) {
+                    previews.add(FilePreview(doc.name, doc.uri, fileMatches.take(previewLimitPerFile)))
+                }
 
-                filesModified += 1
-                totalReplacements += count
+                // if not dryRun and not collectPreview -> perform actual write
+                if (!dryRun && !collectPreview) {
+                    val replaced = pattern.replace(text, replace)
+                    if (replaced != text) {
+                        contentResolver.openOutputStream(doc.uri, "rwt")?.use { it.write(replaced.toByteArray(Charsets.UTF_8)) }
+                        filesModified += 1
+                        totalReplacements += foundCount
+                    }
+                } else {
+                    // dryRun or collectPreview -> only count
+                    totalReplacements += foundCount
+                    // filesModified remains 0 in dryRun/collectPreview phase; for preview we only show candidates
+                }
             } catch (e: Exception) {
                 Log.w("ReplaceTool", "skip file ${doc.uri}", e)
             }
@@ -171,9 +272,7 @@ class ReplaceToolActivity : AppCompatActivity() {
                 if (child.isDirectory) {
                     if (recursive) traverse(child)
                 } else {
-                    // if mime unknown and name has text-ext -> try
                     if (child.type == null && !isProbablyTextByExt(child.name)) {
-                        // attempt to read first bytes and check for null -> safekeep
                         val peek = try { contentResolver.openInputStream(child.uri)?.use { readPeekBytes(it, 512) } } catch (e: Exception) { null }
                         if (peek == null || peek.contains(0.toByte())) continue
                     }
@@ -183,7 +282,7 @@ class ReplaceToolActivity : AppCompatActivity() {
         }
 
         traverse(root)
-        return ReplaceResult(filesModified, totalReplacements)
+        return ReplaceResult(filesModified, totalReplacements, previews)
     }
 
     private fun readAllBytesSafely(input: InputStream): ByteArray? {
@@ -249,6 +348,105 @@ class ReplaceToolActivity : AppCompatActivity() {
                 (window.decorView as? FrameLayout)?.removeView(it)
                 overlay = null
             }
+        }
+    }
+
+    /**
+     * Show preview dialog collected earlier (collectPreview = true).
+     * Dialog lists files with sample matches and offers Apply (perform actual replacement) or Cancel.
+     */
+    private fun showPreviewDialog(
+        scanResult: ReplaceResult,
+        find: String,
+        replace: String,
+        recursive: Boolean,
+        ignoreCase: Boolean,
+        regexMode: Boolean,
+        wholeWord: Boolean,
+        showLineNumbers: Boolean
+    ) {
+        runOnUiThread {
+            val previews = scanResult.previews
+            val totalShown = previews.sumOf { it.matches.size }
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle("Preview: ${previews.size} files, $totalShown matches (showing samples)")
+
+            val scroll = ScrollView(this)
+            val container = LinearLayout(this).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(20, 20, 20, 20)
+                setBackgroundColor(0xFF0A0A0A.toInt())
+            }
+
+            if (previews.isEmpty()) {
+                val empty = TextView(this).apply {
+                    text = "No matches found."
+                    setTextColor(0xFFFFBF00.toInt())
+                }
+                container.addView(empty)
+            } else {
+                for (filePreview in previews) {
+                    val fileTitle = TextView(this).apply {
+                        text = filePreview.fileName ?: filePreview.uri.toString()
+                        setTextColor(0xFFFFBF00.toInt())
+                        textSize = 14f
+                    }
+                    container.addView(fileTitle)
+
+                    for (m in filePreview.matches) {
+                        val tv = TextView(this).apply {
+                            val beforeEsc = m.lineText.replace("\t", "    ")
+                            val afterEsc = m.replacedLine.replace("\t", "    ")
+                            text = if (showLineNumbers) "line ${m.lineNumber}: $beforeEsc\n→ $afterEsc" else "$beforeEsc\n→ $afterEsc"
+                            setTextColor(0xFFFFBF00.toInt())
+                            textSize = 12f
+                            setPadding(0, 6, 0, 10)
+                        }
+                        container.addView(tv)
+                    }
+
+                    val sep = View(this).apply {
+                        layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 1)
+                        setBackgroundColor(0x55FFBF00.toInt())
+                    }
+                    container.addView(sep)
+                }
+            }
+
+            scroll.addView(container)
+            builder.setView(scroll)
+
+            builder.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
+            builder.setPositiveButton("Apply") { dialog, _ ->
+                dialog.dismiss()
+                // Perform actual write operation (no dry-run, no collectPreview)
+                showOverlay()
+                tvStatus.text = "Applying..."
+                lifecycleScope.launchWhenStarted {
+                    val applyResult = withContext(Dispatchers.IO) {
+                        processReplace(
+                            pickedRoot!!, find, replace, recursive, ignoreCase,
+                            regexMode, wholeWord, showLineNumbers,
+                            dryRun = false,
+                            collectPreview = false
+                        )
+                    }
+                    hideOverlay()
+                    tvStatus.text = "Applied. Files changed: ${applyResult.filesModified}, Replacements: ${applyResult.totalReplacements}"
+                    Toast.makeText(
+                        this@ReplaceToolActivity,
+                        "Applied. Files changed: ${applyResult.filesModified}, Replacements: ${applyResult.totalReplacements}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+
+            val dialog = builder.create()
+            dialog.show()
+
+            // Optional: style dialog buttons (amber text)
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.setTextColor(0xFFFFBF00.toInt())
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(0xFFFFBF00.toInt())
         }
     }
 }
