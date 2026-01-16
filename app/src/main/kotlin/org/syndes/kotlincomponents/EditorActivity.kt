@@ -30,7 +30,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.*
-import org.syndes.rust.databinding.ActivityEditorBinding
+import org.syndes.kotlincomponents.databinding.ActivityEditorBinding
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.BufferedWriter
