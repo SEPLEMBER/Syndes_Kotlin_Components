@@ -311,7 +311,7 @@ class ReplaceToolActivity : AppCompatActivity() {
             }
 
             val tv = TextView(this).apply {
-                text = "REPLACING"
+                text = "(\u00A0\u00A0\u00A0\u00A0\u00A0)"
                 textSize = 36f
                 setTextColor(0xFFFFBF00.toInt()) // amber
                 gravity = Gravity.CENTER
