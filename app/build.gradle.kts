@@ -4,15 +4,15 @@ plugins {
 }
 
 android {
-    namespace = "org.syndes.rust"
+    namespace = "org.syndes.kotlincomponents"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "org.syndes.rust"
+        applicationId = "org.syndes.kotlincomponents"
         minSdk = 26
         targetSdk = 34
-        versionCode = 2
-        versionName = "1.1"
+        versionCode = 3
+        versionName = "1.6"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
