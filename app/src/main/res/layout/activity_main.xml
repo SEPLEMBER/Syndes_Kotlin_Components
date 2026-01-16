@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/launch_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0A0A0A"
+    android:padding="24dp">
+
+    <TextView
+        android:id="@+id/launch_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#CCCCCC"
+        android:textSize="16sp"
+        android:lineSpacingExtra="4dp"
+        android:text="Syndes Kotlin Components используются для корректной работы Kotlin в оболочке Syndes. Пожалуйста, не удаляйте это приложение, так как оно необходимо для нормальной работы оболочки и всех возможностей Syndes."
+        android:textAlignment="center" />
+
+</ScrollView>
