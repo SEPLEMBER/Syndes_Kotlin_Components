@@ -28,7 +28,7 @@
             android:layout_marginBottom="8dp"
             android:backgroundTint="#FFBF00"
             android:textColor="#FFBF00"
-            android:textColorHint="#BF8F00"
+            android:hintTextColor="#BF8F00"
             android:padding="12dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
@@ -41,26 +41,36 @@
             android:layout_marginBottom="8dp"
             android:backgroundTint="#FFBF00"
             android:textColor="#FFBF00"
-            android:textColorHint="#BF8F00"
+            android:hintTextColor="#BF8F00"
             android:padding="12dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
         <EditText
             android:id="@+id/etParams"
-            android:hint="Parameters (e.g. -r -i)"
+            android:hint="Parameters (e.g. -r -i -e -w -n --dry-run)"
             android:inputType="text"
             android:layout_marginBottom="8dp"
             android:backgroundTint="#FFBF00"
             android:textColor="#FFBF00"
-            android:textColorHint="#BF8F00"
+            android:hintTextColor="#BF8F00"
             android:padding="12dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
+        <!-- Preview-only checkbox (uses id expected by the Kotlin file: cbPreviewOnly) -->
+        <CheckBox
+            android:id="@+id/cbPreviewOnly"
+            android:text="Preview only (show matches before applying)"
+            android:layout_marginBottom="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:buttonTint="#FFBF00"
+            android:textColor="#FFBF00" />
+
         <TextView
             android:id="@+id/instruction"
-            android:text="Parameters: -r recursive, -i ignore case. All labels are English. This tool edits plain text files only."
+            android:text="Parameters:\n -r : recursive\n -i : ignore case\n -e : treat find as regex\n -w : whole-word match\n -n : show line numbers in preview\n --dry-run : simulate only (no writes)\nUse Preview only to inspect changes before applying."
             android:layout_marginBottom="12dp"
             android:textColor="#FFBF00"
             android:textSize="12sp"
