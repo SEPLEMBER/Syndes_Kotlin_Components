@@ -1,4 +1,4 @@
-package org.syndes.rust
+package org.syndes.kotlincomponents
 
 import android.app.AlertDialog
 import android.content.ClipData
