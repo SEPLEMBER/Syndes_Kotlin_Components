@@ -1,4 +1,4 @@
-package org.syndes.rust
+package org.syndes.kotlincomponents
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
