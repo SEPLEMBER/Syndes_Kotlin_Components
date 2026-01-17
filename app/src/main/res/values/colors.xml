@@ -3,4 +3,7 @@
     <!-- Основные цвета редактора -->
     <color name="editor_background">#0A0A0A</color>
     <color name="editor_text">#0F0F0F</color>
+    <color name="cyber_black">#000000</color>
+    <color name="cyber_neon">#00FFEA</color>
+    <color name="cyber_text">#E6FFF9</color>
 </resources>
