@@ -5,21 +5,7 @@
     android:layout_height="match_parent"
     android:background="#000000">
 
-    <!-- Центрированный киберпанк-текст, крутится программно -->
-    <TextView
-        android:id="@+id/center_logo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="\u00A0\u00A0\u00A0\u00A0\u00A0APP CHECK"
-        android:textSize="48sp"
-        android:letterSpacing="0.05"
-        android:fontFamily="monospace"
-        android:textStyle="bold"
-        android:layout_gravity="center"
-        android:textColor="#00FFEA"
-        android:importantForAccessibility="no" />
-
-    <!-- Основной UI поверх анимации -->
+    <!-- Основной UI -->
     <LinearLayout
         android:id="@+id/controls_panel"
         android:orientation="vertical"
@@ -29,10 +15,10 @@
         android:layout_gravity="center"
         android:visibility="visible">
 
-        <!-- Небольшой отступ сверху, чтобы не накладываться на центр. -->
+        <!-- Отступ сверху -->
         <View
             android:layout_width="match_parent"
-            android:layout_height="140dp" />
+            android:layout_height="40dp" />
 
         <!-- Панель управления -->
         <LinearLayout
@@ -131,7 +117,7 @@
             android:paddingBottom="6dp"
             android:text="Ready" />
 
-        <!-- Список результатов — сделан простым ListView, чтобы не тянуть зависимости. -->
+        <!-- Список результатов -->
         <ListView
             android:id="@+id/list_results"
             android:layout_width="match_parent"
