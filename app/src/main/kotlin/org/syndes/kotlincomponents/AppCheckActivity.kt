@@ -14,7 +14,6 @@ import android.view.View
 import android.view.animation.LinearInterpolator
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.text.HtmlCompat
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
@@ -29,22 +28,14 @@ import kotlin.collections.ArrayList
 import kotlin.collections.LinkedHashMap
 
 /**
- * AppCheckActivity
+ * Исправленный AppCheckActivity — использует reflection для FLAG_PRIVILEGED,
+ * чтобы избежать ошибки компиляции на старых/нестандартных compileSdk.
  *
- * IMPORTANT: add to AndroidManifest.xml:
+ * Не забудьте в AndroidManifest.xml добавить (если нужно):
  * <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
  *
- * Declare activity:
- * <activity android:name=".AppCheckActivity">
- *   <intent-filter>
- *     <action android:name="android.intent.action.MAIN" />
- *     <category android:name="android.intent.category.LAUNCHER" />
- *   </intent-filter>
- * </activity>
- *
- * This activity performs an in-RAM quick scan of installed packages (including system apps),
- * filters by prefixes, analyzes permissions and signatures. It's optimized to stream results
- * to UI and avoid heavy allocations.
+ * И объявить activity (в зависимости от пакета):
+ * <activity android:name=".AppCheckActivity" android:exported="true" ... />
  */
 
 class AppCheckActivity : AppCompatActivity() {
@@ -77,9 +68,19 @@ class AppCheckActivity : AppCompatActivity() {
     private val resultsMap = LinkedHashMap<String, AppEntry>() // packageName -> AppEntry
     private lateinit var adapter: ArrayAdapter<String>
 
+    // Получаем значение FLAG_PRIVILEGED через reflection (если доступно).
+    private val flagPrivilegedValue: Int by lazy {
+        try {
+            val field = ApplicationInfo::class.java.getField("FLAG_PRIVILEGED")
+            field.getInt(null)
+        } catch (t: Throwable) {
+            // поле недоступно в compileSdk — считаем как 0
+            0
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Prevent default action bar color clashes
         supportActionBar?.hide()
         setContentView(R.layout.activity_app_check)
 
@@ -159,7 +160,6 @@ class AppCheckActivity : AppCompatActivity() {
                         pm.getInstalledPackages(flags)
                     }
                 } catch (e: Throwable) {
-                    // fallback to minimal flags
                     @Suppress("DEPRECATION")
                     pm.getInstalledPackages(PackageManager.GET_PERMISSIONS)
                 }
@@ -172,7 +172,13 @@ class AppCheckActivity : AppCompatActivity() {
                     processed++
                     val ai = pkg.applicationInfo
                     val isSys = (ai.flags and ApplicationInfo.FLAG_SYSTEM) != 0 || (ai.flags and ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
-                    val isPriv = (ai.flags and ApplicationInfo.FLAG_PRIVILEGED) != 0
+
+                    // Используем значение FLAG_PRIVILEGED через reflection; если не найдено — считаем false.
+                    val isPriv = if (flagPrivilegedValue != 0) {
+                        (ai.flags and flagPrivilegedValue) != 0
+                    } else {
+                        false
+                    }
 
                     // prefix filtering
                     if (onlySystem && !isSys) continue
@@ -203,7 +209,6 @@ class AppCheckActivity : AppCompatActivity() {
                     val sigList = ArrayList<String>()
                     try {
                         val signatures = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                            // API 28+: use signingInfo when available
                             val signing = pkg.signingInfo
                             signing?.apkContentsSigners ?: pkg.signatures
                         } else {
@@ -273,14 +278,12 @@ class AppCheckActivity : AppCompatActivity() {
                     try {
                         val pi = packageManager.getPermissionInfo(perm, 0)
                         val level = pi.protectionLevel
-                        // protectionLevel may include flags; dangerous if base level is PROTECTION_DANGEROUS
                         val base = level and android.content.pm.PermissionInfo.PROTECTION_MASK_BASE
                         if (base == android.content.pm.PermissionInfo.PROTECTION_DANGEROUS) dangerous++
                     } catch (_: Throwable) { /* ignore unknown permission */ }
                 }
                 dangerCounts.add(pkg to dangerous)
             }
-            // sort by descending dangerous
             dangerCounts.sortByDescending { it.second }
             val top = dangerCounts.take(8)
             val sb = StringBuilder()
