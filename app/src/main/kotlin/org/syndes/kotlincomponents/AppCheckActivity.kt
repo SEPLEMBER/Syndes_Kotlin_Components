@@ -11,7 +11,6 @@ import android.os.Build
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
 import android.view.View
-import android.view.animation.LinearInterpolator
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -28,19 +27,17 @@ import kotlin.collections.ArrayList
 import kotlin.collections.LinkedHashMap
 
 /**
- * Исправленный AppCheckActivity — использует reflection для FLAG_PRIVILEGED,
- * чтобы избежать ошибки компиляции на старых/нестандартных compileSdk.
+ * AppCheckActivity — упрощённая версия:
+ * - убран центрированный крутящийся текст
+ * - убрана проверка privileged
+ * - добавлен разбор субъекта сертификата (CN, OU, O, L, ST, C и т.д.)
+ * - пометка "non-standard" когда отсутствуют ожидаемые поля
  *
- * Не забудьте в AndroidManifest.xml добавить (если нужно):
- * <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
- *
- * И объявить activity (в зависимости от пакета):
- * <activity android:name=".AppCheckActivity" android:exported="true" ... />
+ * Поместите этот файл в пакет org.syndes.kotlincomponents (как указано).
  */
 
 class AppCheckActivity : AppCompatActivity() {
 
-    private lateinit var centerLogo: TextView
     private lateinit var editPrefixes: EditText
     private lateinit var btnScan: Button
     private lateinit var btnPermissions: Button
@@ -51,40 +48,34 @@ class AppCheckActivity : AppCompatActivity() {
     private lateinit var tvStatus: TextView
     private lateinit var listResults: ListView
 
+    // Информация о сертификате, извлечённая нами:
+    data class CertInfo(
+        val fingerprintSha256: String,
+        val attrs: Map<String, String>,
+        val missing: List<String>
+    )
+
     // Model in memory
     data class AppEntry(
         val packageName: String,
         val label: String?,
         val isSystem: Boolean,
-        val isPrivileged: Boolean,
         val sourceDir: String?,
         val installTime: Long?,
         val requestedPermissions: List<String>,
         val grantedPermissions: Set<String>,
-        val signaturesSha256: List<String>
+        val signatures: List<CertInfo>
     )
 
-    private val resultsList = ArrayList<String>() // strings shown in ListView (label + package)
+    private val resultsList = ArrayList<String>() // строки для ListView (label + package)
     private val resultsMap = LinkedHashMap<String, AppEntry>() // packageName -> AppEntry
     private lateinit var adapter: ArrayAdapter<String>
-
-    // Получаем значение FLAG_PRIVILEGED через reflection (если доступно).
-    private val flagPrivilegedValue: Int by lazy {
-        try {
-            val field = ApplicationInfo::class.java.getField("FLAG_PRIVILEGED")
-            field.getInt(null)
-        } catch (t: Throwable) {
-            // поле недоступно в compileSdk — считаем как 0
-            0
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         supportActionBar?.hide()
         setContentView(R.layout.activity_app_check)
 
-        centerLogo = findViewById(R.id.center_logo)
         editPrefixes = findViewById(R.id.edit_prefixes)
         btnScan = findViewById(R.id.btn_scan)
         btnPermissions = findViewById(R.id.btn_permissions)
@@ -116,9 +107,6 @@ class AppCheckActivity : AppCompatActivity() {
             entry?.let { showAppDetailsDialog(it) }
         }
 
-        // Start center logo animation
-        startCenterAnimation()
-
         // Button handlers
         btnScan.setOnClickListener { startScanAndShow() }
         btnPermissions.setOnClickListener { analyzePermissions() }
@@ -126,12 +114,6 @@ class AppCheckActivity : AppCompatActivity() {
         btnExport.setOnClickListener { exportReportToClipboard() }
 
         tvStatus.text = "Ready"
-    }
-
-    private fun startCenterAnimation() {
-        centerLogo.animate().rotationBy(360f).setDuration(12000L).setInterpolator(LinearInterpolator()).withEndAction {
-            if (!isFinishing) startCenterAnimation()
-        }.start()
     }
 
     private fun setStatus(text: String) {
@@ -173,13 +155,6 @@ class AppCheckActivity : AppCompatActivity() {
                     val ai = pkg.applicationInfo
                     val isSys = (ai.flags and ApplicationInfo.FLAG_SYSTEM) != 0 || (ai.flags and ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
 
-                    // Используем значение FLAG_PRIVILEGED через reflection; если не найдено — считаем false.
-                    val isPriv = if (flagPrivilegedValue != 0) {
-                        (ai.flags and flagPrivilegedValue) != 0
-                    } else {
-                        false
-                    }
-
                     // prefix filtering
                     if (onlySystem && !isSys) continue
                     if (excludePrefixes && prefixes.isNotEmpty()) {
@@ -205,8 +180,8 @@ class AppCheckActivity : AppCompatActivity() {
                         }
                     }
 
-                    // signatures -> compute sha256 fingerprints
-                    val sigList = ArrayList<String>()
+                    // signatures -> compute sha256 fingerprints + parse subject attributes
+                    val certInfos = ArrayList<CertInfo>()
                     try {
                         val signatures = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                             val signing = pkg.signingInfo
@@ -222,7 +197,11 @@ class AppCheckActivity : AppCompatActivity() {
                                 try {
                                     val cert = cf.generateCertificate(ByteArrayInputStream(sig.toByteArray())) as X509Certificate
                                     val digest = md.digest(cert.encoded)
-                                    sigList.add(bytesToHex(digest))
+                                    val fp = bytesToHex(digest)
+                                    val attrs = parseSubjectAttributes(cert)
+                                    val required = listOf("CN", "OU", "O", "L", "ST")
+                                    val missing = required.filter { !attrs.containsKey(it) }
+                                    certInfos.add(CertInfo(fp, attrs, missing))
                                 } catch (_: Throwable) {
                                 }
                             }
@@ -240,12 +219,11 @@ class AppCheckActivity : AppCompatActivity() {
                         packageName = pkg.packageName,
                         label = label,
                         isSystem = isSys,
-                        isPrivileged = isPriv,
                         sourceDir = ai.sourceDir,
                         installTime = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) pkg.firstInstallTime else null,
                         requestedPermissions = requested,
                         grantedPermissions = granted,
-                        signaturesSha256 = sigList
+                        signatures = certInfos
                     )
 
                     // add to UI incrementally
@@ -305,13 +283,17 @@ class AppCheckActivity : AppCompatActivity() {
         }
         lifecycleScope.launch(Dispatchers.Default) {
             val map = HashMap<String, MutableList<String>>() // fingerprint -> list of pkgs
+            val nonstandard = ArrayList<Pair<String, CertInfo>>() // pkg, certinfo with missing attrs
             for ((pkg, entry) in resultsMap) {
-                val sigs = entry.signaturesSha256
-                if (sigs.isEmpty()) {
+                val certs = entry.signatures
+                if (certs.isEmpty()) {
                     map.computeIfAbsent("<no-signature>") { ArrayList() }.add(pkg)
                 } else {
-                    for (s in sigs) {
-                        map.computeIfAbsent(s) { ArrayList() }.add(pkg)
+                    for (c in certs) {
+                        map.computeIfAbsent(c.fingerprintSha256) { ArrayList() }.add(pkg)
+                        if (c.missing.isNotEmpty()) {
+                            nonstandard.add(pkg to c)
+                        }
                     }
                 }
             }
@@ -323,6 +305,15 @@ class AppCheckActivity : AppCompatActivity() {
                 val sample = pkgs.take(6).map { resultsMap[it]?.label ?: it }
                 sb.append("  -> ${sample.joinToString(", ")}\n\n")
             }
+
+            if (nonstandard.isNotEmpty()) {
+                sb.append("\nCertificates with missing standard fields (CN/OU/O/L/ST):\n\n")
+                for ((pkg, cert) in nonstandard.take(20)) {
+                    val label = resultsMap[pkg]?.label ?: pkg
+                    sb.append("${label} (${pkg})\n  fingerprint: ${cert.fingerprintSha256}\n  missing: ${cert.missing.joinToString(", ")}\n\n")
+                }
+            }
+
             withContext(Dispatchers.Main) {
                 showTextDialog("Signatures analysis", sb.toString())
             }
@@ -341,13 +332,23 @@ class AppCheckActivity : AppCompatActivity() {
             for ((pkg, entry) in resultsMap) {
                 sb.append("Label: ${entry.label ?: "<no-label>"}\n")
                 sb.append("Package: ${entry.packageName}\n")
-                sb.append("System: ${entry.isSystem}  Privileged: ${entry.isPrivileged}\n")
+                sb.append("System: ${entry.isSystem}\n")
                 sb.append("Source: ${entry.sourceDir ?: "?"}\n")
                 if (entry.requestedPermissions.isNotEmpty()) {
                     sb.append("Requested permissions: ${entry.requestedPermissions.size}\n")
                 }
-                if (entry.signaturesSha256.isNotEmpty()) {
-                    sb.append("Signatures: ${entry.signaturesSha256.joinToString("; ")}\n")
+                if (entry.signatures.isNotEmpty()) {
+                    sb.append("Signatures:\n")
+                    for (c in entry.signatures) {
+                        sb.append("  - fingerprint: ${c.fingerprintSha256}\n")
+                        if (c.attrs.isNotEmpty()) {
+                            val pairs = c.attrs.map { "${it.key}=${it.value}" }
+                            sb.append("    attrs: ${pairs.joinToString(", ")}\n")
+                        }
+                        if (c.missing.isNotEmpty()) {
+                            sb.append("    missing: ${c.missing.joinToString(", ")}\n")
+                        }
+                    }
                 }
                 sb.append("\n")
             }
@@ -365,7 +366,7 @@ class AppCheckActivity : AppCompatActivity() {
         val sb = StringBuilder()
         sb.append("Label: ${entry.label ?: "<no-label>"}\n")
         sb.append("Package: ${entry.packageName}\n")
-        sb.append("System: ${entry.isSystem}  Privileged: ${entry.isPrivileged}\n")
+        sb.append("System: ${entry.isSystem}\n")
         sb.append("Source: ${entry.sourceDir ?: "?"}\n")
         if (!entry.requestedPermissions.isNullOrEmpty()) {
             sb.append("\nPermissions (${entry.requestedPermissions.size}):\n")
@@ -377,9 +378,20 @@ class AppCheckActivity : AppCompatActivity() {
             sb.append("\nPermissions: none\n")
         }
 
-        if (!entry.signaturesSha256.isNullOrEmpty()) {
+        if (!entry.signatures.isNullOrEmpty()) {
             sb.append("\nSignatures:\n")
-            for (s in entry.signaturesSha256) sb.append("  • $s\n")
+            for (c in entry.signatures) {
+                sb.append("  • fingerprint: ${c.fingerprintSha256}\n")
+                if (c.attrs.isNotEmpty()) {
+                    for ((k, v) in c.attrs) {
+                        sb.append("      ${k} = ${v}\n")
+                    }
+                }
+                if (c.missing.isNotEmpty()) {
+                    sb.append("      MISSING: ${c.missing.joinToString(", ")}\n")
+                }
+                sb.append("\n")
+            }
         } else {
             sb.append("\nSignatures: none\n")
         }
@@ -448,5 +460,27 @@ class AppCheckActivity : AppCompatActivity() {
             PackageManager.GET_SIGNATURES
         }
         return flags
+    }
+
+    /**
+     * Разбор DN субъекта сертификата в карту атрибутов.
+     * Примеры ключей: CN, OU, O, L, ST, C
+     */
+    private fun parseSubjectAttributes(cert: X509Certificate): Map<String, String> {
+        val dn = cert.subjectX500Principal?.name ?: ""
+        val map = LinkedHashMap<String, String>()
+        // Простая разбивка по запятым => ключ=значение (ограничение: не обрабатываются вложенные запятые внутри escaped values)
+        val parts = dn.split(",")
+        for (p in parts) {
+            val kv = p.trim().split("=", limit = 2)
+            if (kv.size == 2) {
+                val k = kv[0].trim()
+                val v = kv[1].trim().trim('"')
+                if (k.isNotEmpty() && v.isNotEmpty()) {
+                    map[k] = v
+                }
+            }
+        }
+        return map
     }
 }
