@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root_frame"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000">
+
+    <!-- Центрированный киберпанк-текст, крутится программно -->
+    <TextView
+        android:id="@+id/center_logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="\u00A0\u00A0\u00A0\u00A0\u00A0APP CHECK"
+        android:textSize="48sp"
+        android:letterSpacing="0.05"
+        android:fontFamily="monospace"
+        android:textStyle="bold"
+        android:layout_gravity="center"
+        android:textColor="#00FFEA"
+        android:importantForAccessibility="no" />
+
+    <!-- Основной UI поверх анимации -->
+    <LinearLayout
+        android:id="@+id/controls_panel"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="18dp"
+        android:layout_gravity="center"
+        android:visibility="visible">
+
+        <!-- Небольшой отступ сверху, чтобы не накладываться на центр. -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="140dp" />
+
+        <!-- Панель управления -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+
+            <EditText
+                android:id="@+id/edit_prefixes"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:hint="com.google, com.samsung  (comma-separated)"
+                android:textColor="#AAFFFFFF"
+                android:textColorHint="#444444"
+                android:backgroundTint="#00FFEA"
+                android:inputType="text"
+                android:fontFamily="monospace"
+                android:padding="10dp" />
+
+            <Button
+                android:id="@+id/btn_scan"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Scan"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+
+            <Switch
+                android:id="@+id/switch_only_system"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Only system"
+                android:checked="true"
+                android:textColor="#AAFFFFFF"
+                android:fontFamily="monospace" />
+
+            <Switch
+                android:id="@+id/switch_exclude_prefixes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Exclude prefixes"
+                android:checked="true"
+                android:layout_marginStart="18dp"
+                android:textColor="#AAFFFFFF"
+                android:fontFamily="monospace" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+
+            <Button
+                android:id="@+id/btn_permissions"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Analyze Permissions" />
+
+            <Button
+                android:id="@+id/btn_signatures"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Analyze Signatures"
+                android:layout_marginStart="8dp" />
+
+            <Button
+                android:id="@+id/btn_export"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Export"
+                android:layout_marginStart="8dp"/>
+        </LinearLayout>
+
+        <!-- Прогресс/статус -->
+        <TextView
+            android:id="@+id/tv_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#AAFFFFFF"
+            android:fontFamily="monospace"
+            android:textSize="12sp"
+            android:paddingBottom="6dp"
+            android:text="Ready" />
+
+        <!-- Список результатов — сделан простым ListView, чтобы не тянуть зависимости. -->
+        <ListView
+            android:id="@+id/list_results"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:dividerHeight="1dp"
+            android:paddingTop="6dp"
+            android:transcriptMode="normal" />
+    </LinearLayout>
+
+</FrameLayout>
