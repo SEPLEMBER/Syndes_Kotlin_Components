@@ -5,7 +5,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.DocumentsContract
-import android.util.Patterns
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -17,7 +16,6 @@ import kotlinx.coroutines.*
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.util.*
-import kotlin.math.max
 
 class BatchRenActivity : AppCompatActivity() {
 
@@ -26,7 +24,6 @@ class BatchRenActivity : AppCompatActivity() {
         private const val NEON_GREEN = "#39FF14"
     }
 
-    // UI
     private lateinit var selectFolderBtn: Button
     private lateinit var folderNameTv: TextView
     private lateinit var sourcePatternEt: EditText
@@ -36,11 +33,8 @@ class BatchRenActivity : AppCompatActivity() {
     private lateinit var renameBtn: Button
     private lateinit var statusTv: TextView
 
-    // Selected folder (SAF)
     private var treeUri: Uri? = null
     private var treeDoc: DocumentFile? = null
-
-    // job for animated dots
     private var dotsJob: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,28 +50,21 @@ class BatchRenActivity : AppCompatActivity() {
         renameBtn = findViewById(R.id.btn_rename)
         statusTv = findViewById(R.id.tv_status)
 
-        selectFolderBtn.setOnClickListener {
-            openFolderPicker()
-        }
-
-        renameBtn.setOnClickListener {
-            startRenameProcess()
-        }
-
-        // Instruction (хардкод)
+        selectFolderBtn.setOnClickListener { openFolderPicker() }
+        renameBtn.setOnClickListener { startRenameProcess() }
         instructionTv.text = buildInstructionText()
     }
 
     private fun buildInstructionText(): String {
         return "Инструкция:\n" +
-                "- В поле 1 вводите что искать (обычно расширение, например: .txt). Можно ввести пусто — тогда будут все файлы.\n" +
-                "- В поле 2 вводите правило переименования. Примеры:\n" +
-                "    • .py — просто заменить расширение на .py\n" +
-                "    • IMG_\$numb.jpg — переименовать в IMG_1.jpg, IMG_2.jpg …\n" +
-                "    • rev:IMG_\$numb.jpg — то же самое, но в обратном порядке по дате (новые → старые).\n" +
-                "- В поле флагов укажите: -I (ignore case), -r (рекурсивно). Пример: \"-I -r\".\n" +
-                "- Нажмите Select folder → выберите папку (используется SAF). После выхода из активности выбор не сохраняется.\n" +
-                "- Нажмите Rename, процесс запустится в фоне (корутины), под кнопкой будет Status: working с анимацией."
+                "- Поле 1: что искать (обычно расширение, например: .txt). Пусто — все файлы.\n" +
+                "- Поле 2: правило переименования. Примеры:\n" +
+                "    • .py — заменить расширение на .py\n" +
+                "    • IMG_\$numb.jpg — последовательность IMG_1.jpg, IMG_2.jpg …\n" +
+                "    • rev:IMG_\$numb.jpg — то же, но в обратном порядке по дате.\n" +
+                "- Флаги: -I/-i (игнорировать регистр), -r (рекурсивно). Можно писать вместе: -ir, -ri или с пробелами.\n" +
+                "- Select folder (SAF). Права не сохраняются (по требованию).\n" +
+                "- Нажмите Rename — процесс в корутинах; под кнопкой Status: working с анимацией."
     }
 
     private fun openFolderPicker() {
@@ -91,7 +78,7 @@ class BatchRenActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_CODE_OPEN_TREE && resultCode == Activity.RESULT_OK) {
             val uri = data?.data ?: return
-            // Important: we DO NOT persist permission intentionally, so it will be forgotten after exit
+            // Не сохраняем permissions намеренно
             treeUri = uri
             treeDoc = DocumentFile.fromTreeUri(this, uri)
             folderNameTv.text = "Folder: ${treeDoc?.name ?: uri.path}"
@@ -105,37 +92,30 @@ class BatchRenActivity : AppCompatActivity() {
             return
         }
 
-        val sourcePattern = sourcePatternEt.text.toString().trim()
+        val sourcePatternRaw = sourcePatternEt.text.toString().trim()
         var renamePatternRaw = renamePatternEt.text.toString().trim()
-        val flags = flagsEt.text.toString()
+        val flagsRaw = flagsEt.text.toString()
 
-        val ignoreCase = flags.contains("-I")
-        val recursive = flags.contains("-r")
+        // Normalize flags to be case-insensitive and compact (accept -I/-i, -r)
+        val compactFlags = flagsRaw.lowercase(Locale.getDefault()).replace("\\s+".toRegex(), "")
+        val ignoreCase = compactFlags.contains("-i")
+        val recursive = compactFlags.contains("-r")
 
-        // reverse-order flag embedded in rename pattern: rev:NAME
+        // reverse-order flag embedded in rename pattern (rev:)
         var reverseOrder = false
         if (renamePatternRaw.startsWith("rev:", ignoreCase = true)) {
             reverseOrder = true
             renamePatternRaw = renamePatternRaw.substring(4)
         }
 
-        // start status animation
         dotsJob?.cancel()
         statusTv.text = "Status: working"
         dotsJob = startDotsAnimation()
 
-        // run rename in coroutine
         lifecycleScope.launch {
             val result = withContext(Dispatchers.IO) {
                 try {
-                    processRename(
-                        tree,
-                        sourcePattern,
-                        renamePatternRaw,
-                        ignoreCase,
-                        recursive,
-                        reverseOrder
-                    )
+                    processRename(tree, sourcePatternRaw, renamePatternRaw, ignoreCase, recursive, reverseOrder)
                     "Status: done"
                 } catch (e: CancellationException) {
                     "Status: cancelled"
@@ -163,40 +143,35 @@ class BatchRenActivity : AppCompatActivity() {
 
     private fun processRename(
         root: DocumentFile,
-        sourcePattern: String,
+        sourcePatternRaw: String,
         renamePattern: String,
         ignoreCase: Boolean,
         recursive: Boolean,
         reverseOrder: Boolean
     ) {
-        // collect files
+        // collect all files first
         val allFiles = mutableListOf<DocumentFile>()
         collectFiles(root, recursive, allFiles)
 
-        // filter by sourcePattern
+        // prepare matcher for sourcePattern
+        val sourcePattern = sourcePatternRaw.trim()
         val matching = allFiles.filter { df ->
             val name = df.name ?: return@filter false
             if (sourcePattern.isEmpty()) return@filter true
-            // If pattern starts with '.', treat as extension match
             if (sourcePattern.startsWith(".")) {
-                if (ignoreCase) {
-                    return@filter name.lowercase(Locale.getDefault()).endsWith(sourcePattern.lowercase(Locale.getDefault()))
-                } else {
-                    return@filter name.endsWith(sourcePattern)
-                }
+                // exact suffix match of sourcePattern (with or without case)
+                return@filter if (ignoreCase) name.lowercase(Locale.getDefault()).endsWith(sourcePattern.lowercase(Locale.getDefault()))
+                else name.endsWith(sourcePattern)
             } else {
-                // fallback: suffix match or exact match
-                return@filter if (ignoreCase) {
-                    name.lowercase(Locale.getDefault()).endsWith(sourcePattern.lowercase(Locale.getDefault()))
-                } else {
-                    name.endsWith(sourcePattern)
-                }
+                // fallback: suffix match
+                return@filter if (ignoreCase) name.lowercase(Locale.getDefault()).endsWith(sourcePattern.lowercase(Locale.getDefault()))
+                else name.endsWith(sourcePattern)
             }
         }.toMutableList()
 
         if (matching.isEmpty()) return
 
-        // order by lastModified (date added unavailable via SAF reliably). lastModified used.
+        // sort by lastModified, newest last (so forward order = old->new). reverseOrder flips it.
         matching.sortBy { it.lastModified() ?: 0L }
         if (reverseOrder) matching.reverse()
 
@@ -205,44 +180,50 @@ class BatchRenActivity : AppCompatActivity() {
             var counter = 1
             for (file in matching) {
                 val parent = file.parentFile ?: continue
-                val extFromPattern = extractExtensionFromPattern(renamePattern)
-                val newNameWithoutExt = renamePattern.replace("\$numb", counter.toString())
-                val desiredName = if (extFromPattern != null) {
-                    newNameWithoutExt // pattern included extension
-                } else {
-                    // append original extension if pattern has no extension
-                    val origExt = getExtension(file.name)
-                    "$newNameWithoutExt${if (origExt != null) origExt else ""}"
-                }
-                safeCopyAndReplace(file, parent, desiredName)
+                // If renamePattern already contains extension (like IMG_$numb.jpg), use as-is.
+                val desiredName = renamePattern.replace("\$numb", counter.toString())
+                val finalName = ensureUniqueName(parent, desiredName)
+                safeCopyAndReplace(file, parent, finalName)
                 counter++
             }
         } else {
-            // renamePattern is probably an extension (like .py) or fixed name
+            // If renamePattern is an extension like ".py" -> replace the sourcePattern suffix with this extension
             if (renamePattern.startsWith(".")) {
-                // replace extension for every file
+                // require sourcePattern be non-empty (or else we replace last extension)
                 for (file in matching) {
                     val parent = file.parentFile ?: continue
-                    val baseName = stripExtension(file.name)
+                    val originalName = file.name ?: continue
+                    val baseName = if (sourcePattern.startsWith(".") && originalName.length > sourcePattern.length &&
+                        (if (ignoreCase) originalName.lowercase(Locale.getDefault()).endsWith(sourcePattern.lowercase(Locale.getDefault())) else originalName.endsWith(sourcePattern))
+                    ) {
+                        // remove exactly the sourcePattern suffix
+                        originalName.substring(0, originalName.length - sourcePattern.length)
+                    } else {
+                        // fallback: remove last extension (behaviour for cases where sourcePattern was empty or non-extension)
+                        val idx = originalName.lastIndexOf('.')
+                        if (idx >= 0) originalName.substring(0, idx) else originalName
+                    }
                     val desiredName = baseName + renamePattern
-                    safeCopyAndReplace(file, parent, desiredName)
+                    val finalName = ensureUniqueName(parent, desiredName)
+                    safeCopyAndReplace(file, parent, finalName)
                 }
             } else {
-                // If single file -> rename to given name (keep extension)
+                // renamePattern is a base name without $numb and without starting dot
                 if (matching.size == 1) {
                     val file = matching.first()
                     val parent = file.parentFile ?: return
-                    val origExt = getExtension(file.name) ?: ""
-                    val desiredName = renamePattern + origExt
-                    safeCopyAndReplace(file, parent, desiredName)
+                    val origExt = getExtension(file.name)
+                    val desiredName = renamePattern + (origExt ?: "")
+                    val finalName = ensureUniqueName(parent, desiredName)
+                    safeCopyAndReplace(file, parent, finalName)
                 } else {
-                    // Multiple files and pattern has no $numb — append suffix indices
                     var counter = 1
                     for (file in matching) {
                         val parent = file.parentFile ?: continue
                         val origExt = getExtension(file.name) ?: ""
                         val desiredName = "${renamePattern}_${counter}${origExt}"
-                        safeCopyAndReplace(file, parent, desiredName)
+                        val finalName = ensureUniqueName(parent, desiredName)
+                        safeCopyAndReplace(file, parent, finalName)
                         counter++
                     }
                 }
@@ -250,46 +231,7 @@ class BatchRenActivity : AppCompatActivity() {
         }
     }
 
-    private fun collectFiles(dir: DocumentFile, recursive: Boolean, out: MutableList<DocumentFile>) {
-        val children = dir.listFiles()
-        for (c in children) {
-            if (c.isDirectory) {
-                if (recursive) collectFiles(c, true, out)
-            } else if (c.isFile) {
-                out.add(c)
-            }
-        }
-    }
-
-    private fun extractExtensionFromPattern(pattern: String): String? {
-        val idx = pattern.lastIndexOf('.')
-        if (idx >= 0 && idx < pattern.length - 1) {
-            return pattern.substring(idx)
-        }
-        return null
-    }
-
-    private fun stripExtension(name: String?): String {
-        if (name == null) return ""
-        val idx = name.lastIndexOf('.')
-        return if (idx >= 0) name.substring(0, idx) else name
-    }
-
-    private fun getExtension(name: String?): String? {
-        if (name == null) return null
-        val idx = name.lastIndexOf('.')
-        return if (idx >= 0) name.substring(idx) else null
-    }
-
-    private fun safeCopyAndReplace(source: DocumentFile, parent: DocumentFile, desiredName: String) {
-        // Determine MIME type (try to reuse original)
-        val origUri = source.uri
-        val mime = contentResolver.getType(origUri) ?: "application/octet-stream"
-
-        // read into RAM
-        val bytes = readBytesFromUri(origUri)
-
-        // ensure unique desired name
+    private fun ensureUniqueName(parent: DocumentFile, desiredName: String): String {
         var candidate = desiredName
         var attempt = 0
         while (parent.findFile(candidate) != null) {
@@ -303,17 +245,40 @@ class BatchRenActivity : AppCompatActivity() {
                 "${desiredName}_$attempt"
             }
         }
+        return candidate
+    }
 
-        // create new file and write
-        val created = parent.createFile(mime, candidate)
-            ?: throw RuntimeException("Cannot create file $candidate in ${parent.uri}")
+    private fun collectFiles(dir: DocumentFile, recursive: Boolean, out: MutableList<DocumentFile>) {
+        val children = dir.listFiles()
+        for (c in children) {
+            if (c.isDirectory) {
+                if (recursive) collectFiles(c, true, out)
+            } else if (c.isFile) {
+                out.add(c)
+            }
+        }
+    }
+
+    private fun getExtension(name: String?): String? {
+        if (name == null) return null
+        val idx = name.lastIndexOf('.')
+        return if (idx >= 0) name.substring(idx) else null
+    }
+
+    private fun safeCopyAndReplace(source: DocumentFile, parent: DocumentFile, desiredName: String) {
+        val origUri = source.uri
+        val mime = contentResolver.getType(origUri) ?: "application/octet-stream"
+        val bytes = readBytesFromUri(origUri)
+
+        val created = parent.createFile(mime, desiredName)
+            ?: throw RuntimeException("Cannot create file $desiredName in ${parent.uri}")
 
         contentResolver.openOutputStream(created.uri)?.use { os ->
             os.write(bytes)
             os.flush()
         } ?: throw RuntimeException("Cannot open output for ${created.uri}")
 
-        // delete original
+        // delete original AFTER successful create/write
         source.delete()
     }
 
