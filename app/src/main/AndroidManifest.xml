@@ -70,6 +70,11 @@
             android:exported="true"
             android:theme="@style/AppTheme" />
 
+                <activity
+            android:name=".ReplaceToolActivity"
+            android:exported="true"
+            android:theme="@style/AppTheme" />
+
     </application>
 
 </manifest>
