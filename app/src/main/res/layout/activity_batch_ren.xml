@@ -1,106 +1,126 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:background="#0A0A0A"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:background="#000000"
+    android:padding="18dp">
 
     <LinearLayout
-        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
         <TextView
-            android:id="@+id/titleLabel"
-            android:text="Batch Rename"
+            android:id="@+id/tv_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="BatchRen — retro/cyberpunk"
+            android:textColor="#39FF14"
             android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="12dp"
-            android:textColor="#39FF14"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:paddingBottom="10dp"
+            android:typeface="monospace" />
 
-        <EditText
-            android:id="@+id/etFind"
-            android:hint="Find (pattern or substring)"
-            android:inputType="text"
-            android:minLines="1"
-            android:layout_marginBottom="8dp"
-            android:backgroundTint="#39FF14"
-            android:textColor="#39FF14"
-            android:textColorHint="#8AF58A"
-            android:padding="12dp"
+        <Button
+            android:id="@+id/btn_select_folder"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-
-        <EditText
-            android:id="@+id/etReplace"
-            android:hint="Replace (template, supports $1, {n}, {n:03})"
-            android:inputType="text"
-            android:minLines="1"
-            android:layout_marginBottom="8dp"
-            android:backgroundTint="#39FF14"
-            android:textColor="#39FF14"
-            android:textColorHint="#8AF58A"
-            android:padding="12dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-
-        <EditText
-            android:id="@+id/etParams"
-            android:hint="Parameters (e.g. -r -e -i -x --dry-run --collision=rename|skip|overwrite)"
-            android:inputType="text"
-            android:layout_marginBottom="8dp"
-            android:backgroundTint="#39FF14"
-            android:textColor="#39FF14"
-            android:textColorHint="#8AF58A"
-            android:padding="12dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-
-        <CheckBox
-            android:id="@+id/cbPreviewOnly"
-            android:text="Preview only (show matches before applying)"
-            android:layout_marginBottom="8dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:buttonTint="#39FF14"
-            android:textColor="#39FF14" />
+            android:layout_height="48dp"
+            android:text="Select folder (SAF)"
+            android:textColor="#000000"
+            android:background="#39FF14"
+            android:textAllCaps="false" />
 
         <TextView
-            android:id="@+id/instruction"
-            android:text="Parameters:\n -r : recursive\n -e : pattern is regex\n -i : ignore case\n -x : preserve extension (if template lacks extension)\n --dry-run : simulate only (no writes)\n --collision=rename|skip|overwrite : conflict strategy\nTemplate notes: use $1 for regex groups; {n} inserts incremental number; {n:03} pads to width 3."
-            android:layout_marginBottom="12dp"
-            android:textColor="#39FF14"
-            android:textSize="12sp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <Button
-            android:id="@+id/btnChoose"
-            android:text="Choose Folder (SAF)"
-            android:layout_marginBottom="12dp"
+            android:id="@+id/tv_folder_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:backgroundTint="#222222"
-            android:textColor="#39FF14"/>
+            android:text="Folder: (none)"
+            android:textColor="#39FF14"
+            android:paddingTop="8dp"
+            android:typeface="monospace" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="1) Что искать (например .txt)"
+            android:textColor="#39FF14"
+            android:paddingTop="14dp"
+            android:typeface="monospace" />
+
+        <EditText
+            android:id="@+id/et_source"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="#0b0b0b"
+            android:textColor="#39FF14"
+            android:hint=".txt"
+            android:hintTextColor="#2efc63"
+            android:padding="10dp"
+            android:typeface="monospace" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="2) Правило переименования (e.g. IMG_\$numb.jpg or .py)"
+            android:textColor="#39FF14"
+            android:paddingTop="12dp"
+            android:typeface="monospace" />
+
+        <EditText
+            android:id="@+id/et_rename"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="#0b0b0b"
+            android:textColor="#39FF14"
+            android:hint="IMG_\$numb.jpg or .py"
+            android:hintTextColor="#2efc63"
+            android:padding="10dp"
+            android:typeface="monospace" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="3) Флаги: -I (ignore case), -r (recursive)"
+            android:textColor="#39FF14"
+            android:paddingTop="12dp"
+            android:typeface="monospace" />
+
+        <EditText
+            android:id="@+id/et_flags"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:background="#0b0b0b"
+            android:textColor="#39FF14"
+            android:hint="-I -r"
+            android:hintTextColor="#2efc63"
+            android:padding="10dp"
+            android:typeface="monospace" />
+
+        <TextView
+            android:id="@+id/tv_instruction"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Instruction area"
+            android:textColor="#39FF14"
+            android:paddingTop="14dp"
+            android:typeface="monospace" />
 
         <Button
-            android:id="@+id/btnReplace"
+            android:id="@+id/btn_rename"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
             android:text="Rename"
-            android:layout_marginBottom="12dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:backgroundTint="#39FF14"
-            android:textColor="#0A0A0A"/>
+            android:textColor="#000000"
+            android:background="#39FF14"
+            android:textAllCaps="false"
+            android:layout_marginTop="12dp" />
 
         <TextView
-            android:id="@+id/tvStatus"
-            android:text=""
-            android:layout_marginTop="8dp"
-            android:textColor="#39FF14"
+            android:id="@+id/tv_status"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
+            android:layout_height="wrap_content"
+            android:text="Status: idle"
+            android:textColor="#39FF14"
+            android:paddingTop="10dp"
+            android:typeface="monospace" />
     </LinearLayout>
 </ScrollView>
