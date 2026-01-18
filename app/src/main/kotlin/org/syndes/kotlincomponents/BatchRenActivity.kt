@@ -21,8 +21,8 @@ import java.io.BufferedOutputStream
 import java.io.InputStream
 import java.nio.charset.Charset
 import java.util.concurrent.atomic.AtomicInteger
-import java.util.regex.Regex
 import java.util.regex.Pattern
+import kotlin.text.Regex
 import kotlin.text.RegexOption
 
 class BatchRenActivity : AppCompatActivity() {
@@ -128,7 +128,7 @@ class BatchRenActivity : AppCompatActivity() {
                 markConflicts(scanResult.candidates)
 
                 if (dryRun) {
-                    // show preview dialog; if cbPreviewOnly -> don't apply; if explicit --dry-run -> show and don't apply
+                    // show preview dialog; don't apply
                     showPreviewDialog(scanResult.candidates, applyImmediately = false, collisionStrategy = collisionStrategy, dryRun = true)
                 } else {
                     // show preview and let user confirm apply
@@ -177,7 +177,7 @@ class BatchRenActivity : AppCompatActivity() {
             }
         } else null
 
-        fun processFile(doc: DocumentFile) {
+        fun processFile(doc: DocumentFile, parentDir: DocumentFile) {
             try {
                 if (!doc.isFile) return
                 val name = doc.name ?: return
@@ -204,7 +204,7 @@ class BatchRenActivity : AppCompatActivity() {
 
                 // compute newName (apply replacement on base)
                 val num = counter.getAndIncrement()
-                var newBase = computeReplacement(base, patternText, template, regexMode, regex, num)
+                var newBase = computeReplacement(base, patternText, template, regexMode, regex, ignoreCase, num)
                 // attach extension if preserveExt and template didn't already include an extension
                 val templateLooksLikeHasExt = template.contains('.')
                 val finalName = if (preserveExt && !templateLooksLikeHasExt && ext.isNotEmpty()) {
@@ -213,19 +213,19 @@ class BatchRenActivity : AppCompatActivity() {
                     newBase
                 }
 
-                candidates.add(RenameCandidate(originalName = name, uri = doc.uri, parent = doc.parentFile ?: root, newName = sanitizeName(finalName)))
+                candidates.add(RenameCandidate(originalName = name, uri = doc.uri, parent = parentDir, newName = sanitizeName(finalName)))
             } catch (e: Exception) {
                 Log.w(TAG, "scan skip file ${doc.uri}", e)
             }
         }
 
         fun traverse(dir: DocumentFile) {
-            val children = dir.listFiles()
+            val children = try { dir.listFiles() } catch (e: Exception) { arrayOf<DocumentFile>() }
             for (child in children) {
                 if (child.isDirectory) {
                     if (recursive) traverse(child)
                 } else {
-                    processFile(child)
+                    processFile(child, dir)
                 }
             }
         }
@@ -247,6 +247,7 @@ class BatchRenActivity : AppCompatActivity() {
         template: String,
         regexMode: Boolean,
         regex: Regex?,
+        ignoreCase: Boolean,
         number: Int
     ): String {
         // replace numbering placeholders first
@@ -258,14 +259,12 @@ class BatchRenActivity : AppCompatActivity() {
                 try {
                     regex.replace(base, templateWithNumber)
                 } catch (e: Exception) {
-                    // fallback: if replace fails, return template + number
-                    templateWithNumber.replace("$", "\\$")
                     templateWithNumber
                 }
             } else {
                 // simple literal replacement of the pattern in the base
                 if (patternText.isEmpty()) return templateWithNumber
-                base.replace(patternText, templateWithNumber, ignoreCase = false)
+                base.replace(patternText, templateWithNumber, ignoreCase = ignoreCase)
             }
         } catch (e: Exception) {
             templateWithNumber
@@ -317,8 +316,8 @@ class BatchRenActivity : AppCompatActivity() {
                 }
                 set
             }
-            // conflict exists if newName already in existing (some file already has it)
-            if (existing.contains(c.newName) && !existing.contains(c.originalName)) {
+            // conflict exists if newName already in existing (and that existing file is not this same file)
+            if (existing.contains(c.newName) && c.originalName != c.newName) {
                 c.conflict = true
             }
         }
@@ -421,7 +420,7 @@ class BatchRenActivity : AppCompatActivity() {
             try {
                 val parent = c.parent
                 var targetName = c.newName
-                val existing = parent.findFile(targetName)
+                val existing = try { parent.findFile(targetName) } catch (e: Exception) { null }
                 if (existing != null && existing.exists() && existing.name != c.originalName) {
                     // there's a conflicting file
                     when (collisionStrategy) {
@@ -433,10 +432,9 @@ class BatchRenActivity : AppCompatActivity() {
                             // generate unique name with suffix
                             var idx = 1
                             val (base, ext) = splitNameExt(targetName)
-                            var candidateName = if (ext.isNotEmpty()) "$base" else "$base"
                             var finalName = if (ext.isNotEmpty()) "$base.$ext" else base
                             while (parent.findFile(finalName) != null) {
-                                candidateName = "${base}_$idx"
+                                val candidateName = "${base}_$idx"
                                 finalName = if (ext.isNotEmpty()) "$candidateName.$ext" else candidateName
                                 idx++
                             }
