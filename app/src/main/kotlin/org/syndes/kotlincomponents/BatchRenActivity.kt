@@ -5,7 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.DocumentsContract
-import android.view.View
+import android.webkit.MimeTypeMap
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -78,7 +78,7 @@ class BatchRenActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_CODE_OPEN_TREE && resultCode == Activity.RESULT_OK) {
             val uri = data?.data ?: return
-            // Не сохраняем permissions намеренно
+            // intentionally NOT taking persistable permission per spec
             treeUri = uri
             treeDoc = DocumentFile.fromTreeUri(this, uri)
             folderNameTv.text = "Folder: ${treeDoc?.name ?: uri.path}"
@@ -96,12 +96,12 @@ class BatchRenActivity : AppCompatActivity() {
         var renamePatternRaw = renamePatternEt.text.toString().trim()
         val flagsRaw = flagsEt.text.toString()
 
-        // Normalize flags to be case-insensitive and compact (accept -I/-i, -r)
+        // Normalize flags case-insensitively
         val compactFlags = flagsRaw.lowercase(Locale.getDefault()).replace("\\s+".toRegex(), "")
         val ignoreCase = compactFlags.contains("-i")
         val recursive = compactFlags.contains("-r")
 
-        // reverse-order flag embedded in rename pattern (rev:)
+        // reverse-order embedded in rename pattern: rev:
         var reverseOrder = false
         if (renamePatternRaw.startsWith("rev:", ignoreCase = true)) {
             reverseOrder = true
@@ -149,71 +149,53 @@ class BatchRenActivity : AppCompatActivity() {
         recursive: Boolean,
         reverseOrder: Boolean
     ) {
-        // collect all files first
         val allFiles = mutableListOf<DocumentFile>()
         collectFiles(root, recursive, allFiles)
 
-        // prepare matcher for sourcePattern
         val sourcePattern = sourcePatternRaw.trim()
         val matching = allFiles.filter { df ->
             val name = df.name ?: return@filter false
             if (sourcePattern.isEmpty()) return@filter true
-            if (sourcePattern.startsWith(".")) {
-                // exact suffix match of sourcePattern (with or without case)
-                return@filter if (ignoreCase) name.lowercase(Locale.getDefault()).endsWith(sourcePattern.lowercase(Locale.getDefault()))
-                else name.endsWith(sourcePattern)
+            // exact suffix match of sourcePattern (case-insensitive if requested)
+            if (ignoreCase) {
+                name.lowercase(Locale.getDefault()).endsWith(sourcePattern.lowercase(Locale.getDefault()))
             } else {
-                // fallback: suffix match
-                return@filter if (ignoreCase) name.lowercase(Locale.getDefault()).endsWith(sourcePattern.lowercase(Locale.getDefault()))
-                else name.endsWith(sourcePattern)
+                name.endsWith(sourcePattern)
             }
         }.toMutableList()
 
         if (matching.isEmpty()) return
 
-        // sort by lastModified, newest last (so forward order = old->new). reverseOrder flips it.
+        // sort by lastModified (old -> new); reverseOrder flips it
         matching.sortBy { it.lastModified() ?: 0L }
         if (reverseOrder) matching.reverse()
 
-        // If renamePattern contains $numb -> sequential renaming
         if (renamePattern.contains("\$numb")) {
             var counter = 1
             for (file in matching) {
                 val parent = file.parentFile ?: continue
-                // If renamePattern already contains extension (like IMG_$numb.jpg), use as-is.
                 val desiredName = renamePattern.replace("\$numb", counter.toString())
                 val finalName = ensureUniqueName(parent, desiredName)
                 safeCopyAndReplace(file, parent, finalName)
                 counter++
             }
         } else {
-            // If renamePattern is an extension like ".py" -> replace the sourcePattern suffix with this extension
             if (renamePattern.startsWith(".")) {
-                // require sourcePattern be non-empty (or else we replace last extension)
+                // We're replacing the sourcePattern suffix with renamePattern.
                 for (file in matching) {
                     val parent = file.parentFile ?: continue
                     val originalName = file.name ?: continue
-                    val baseName = if (sourcePattern.startsWith(".") && originalName.length > sourcePattern.length &&
-                        (if (ignoreCase) originalName.lowercase(Locale.getDefault()).endsWith(sourcePattern.lowercase(Locale.getDefault())) else originalName.endsWith(sourcePattern))
-                    ) {
-                        // remove exactly the sourcePattern suffix
-                        originalName.substring(0, originalName.length - sourcePattern.length)
-                    } else {
-                        // fallback: remove last extension (behaviour for cases where sourcePattern was empty or non-extension)
-                        val idx = originalName.lastIndexOf('.')
-                        if (idx >= 0) originalName.substring(0, idx) else originalName
-                    }
+                    val baseName = removeSourceSuffixExactly(originalName, sourcePattern, ignoreCase)
                     val desiredName = baseName + renamePattern
                     val finalName = ensureUniqueName(parent, desiredName)
                     safeCopyAndReplace(file, parent, finalName)
                 }
             } else {
-                // renamePattern is a base name without $numb and without starting dot
                 if (matching.size == 1) {
                     val file = matching.first()
                     val parent = file.parentFile ?: return
-                    val origExt = getExtension(file.name)
-                    val desiredName = renamePattern + (origExt ?: "")
+                    val origExt = getExtension(file.name) ?: ""
+                    val desiredName = renamePattern + origExt
                     val finalName = ensureUniqueName(parent, desiredName)
                     safeCopyAndReplace(file, parent, finalName)
                 } else {
@@ -229,6 +211,32 @@ class BatchRenActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    /**
+     * Remove exactly the sourcePattern suffix from originalName if it matches (respecting ignoreCase).
+     * If sourcePattern is empty or doesn't match, fallback to removing the last extension (last dot).
+     *
+     * Examples:
+     *  - removeSourceSuffixExactly("script.txt", ".txt", false) -> "script"
+     *  - removeSourceSuffixExactly("a.b.txt", ".txt", false) -> "a.b"
+     *  - removeSourceSuffixExactly("file", ".txt", false) -> "file" (no change)
+     */
+    private fun removeSourceSuffixExactly(originalName: String, sourcePattern: String, ignoreCase: Boolean): String {
+        if (sourcePattern.isNotEmpty() && originalName.length > sourcePattern.length) {
+            if (ignoreCase) {
+                if (originalName.lowercase(Locale.getDefault()).endsWith(sourcePattern.lowercase(Locale.getDefault()))) {
+                    return originalName.substring(0, originalName.length - sourcePattern.length)
+                }
+            } else {
+                if (originalName.endsWith(sourcePattern)) {
+                    return originalName.substring(0, originalName.length - sourcePattern.length)
+                }
+            }
+        }
+        // fallback: remove last extension if present
+        val idx = originalName.lastIndexOf('.')
+        return if (idx > 0) originalName.substring(0, idx) else originalName
     }
 
     private fun ensureUniqueName(parent: DocumentFile, desiredName: String): String {
@@ -265,12 +273,39 @@ class BatchRenActivity : AppCompatActivity() {
         return if (idx >= 0) name.substring(idx) else null
     }
 
+    /**
+     * Compute MIME type to use when creating the new file.
+     * Priority:
+     * 1) If desiredName has extension and MimeTypeMap knows it -> use that MIME
+     * 2) Else use origMime (from source)
+     * 3) Else "application/octet-stream"
+     */
+    private fun computeMimeForName(desiredName: String, origMime: String?): String {
+        val ext = getExtension(desiredName)
+        if (ext != null && ext.length > 1) {
+            val extNoDot = ext.substring(1).lowercase(Locale.getDefault())
+            val map = MimeTypeMap.getSingleton()
+            val mimeFromExt = map.getMimeTypeFromExtension(extNoDot)
+            if (!mimeFromExt.isNullOrEmpty()) return mimeFromExt
+        }
+        return origMime ?: "application/octet-stream"
+    }
+
+    /**
+     * Copy file bytes (in RAM), create new file with MIME derived from desired name (important),
+     * then delete source only after successful write.
+     */
     private fun safeCopyAndReplace(source: DocumentFile, parent: DocumentFile, desiredName: String) {
         val origUri = source.uri
-        val mime = contentResolver.getType(origUri) ?: "application/octet-stream"
+        val origMime = contentResolver.getType(origUri)
+        // read into RAM
         val bytes = readBytesFromUri(origUri)
 
-        val created = parent.createFile(mime, desiredName)
+        // choose MIME based on desiredName (prevents system appending old extension)
+        val desiredMime = computeMimeForName(desiredName, origMime)
+
+        // create file with desired MIME and the exact desiredName
+        val created = parent.createFile(desiredMime, desiredName)
             ?: throw RuntimeException("Cannot create file $desiredName in ${parent.uri}")
 
         contentResolver.openOutputStream(created.uri)?.use { os ->
