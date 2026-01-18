@@ -194,11 +194,16 @@ class BatchRenActivity : AppCompatActivity() {
                     ext = ""
                 }
 
-                val matched = if (regexMode && regex != null) {
-                    regex.containsMatchIn(base)
-                } else {
-                    if (ignoreCase) base.lowercase().contains(patternText.lowercase()) else base.contains(patternText)
-                }
+                val targetForMatch = if (preserveExt) base else name
+
+val matched = if (regexMode && regex != null) {
+    regex.containsMatchIn(targetForMatch)
+} else {
+    if (ignoreCase)
+        targetForMatch.lowercase().contains(patternText.lowercase())
+    else
+        targetForMatch.contains(patternText)
+}
 
                 if (!matched) return
 
@@ -574,7 +579,7 @@ class BatchRenActivity : AppCompatActivity() {
             }
 
             val tv = TextView(this).apply {
-                text = "RENAMING"
+                text = "(\u00A0\u00A0\u00A0\u00A0\u00A0)"
                 textSize = 36f
                 setTextColor(NEON_GREEN)
                 gravity = Gravity.CENTER
