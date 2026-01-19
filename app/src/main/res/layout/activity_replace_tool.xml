@@ -12,7 +12,7 @@
 
         <TextView
             android:id="@+id/titleLabel"
-            android:text="grep and replace"
+            android:text="Grep and Replace"
             android:textSize="20sp"
             android:textStyle="bold"
             android:layout_marginBottom="12dp"
