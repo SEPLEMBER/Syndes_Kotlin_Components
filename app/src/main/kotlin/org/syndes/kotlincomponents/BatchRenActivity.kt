@@ -56,15 +56,15 @@ class BatchRenActivity : AppCompatActivity() {
     }
 
     private fun buildInstructionText(): String {
-        return "Инструкция:\n" +
-                "- Поле 1: что искать (обычно расширение, например: .txt). Пусто — все файлы.\n" +
-                "- Поле 2: правило переименования. Примеры:\n" +
-                "    • .py — заменить расширение на .py\n" +
-                "    • IMG_\$numb.jpg — последовательность IMG_1.jpg, IMG_2.jpg …\n" +
-                "    • rev:IMG_\$numb.jpg — то же, но в обратном порядке по дате.\n" +
-                "- Флаги: -I/-i (игнорировать регистр), -r (рекурсивно). Можно писать вместе: -ir, -ri или с пробелами.\n" +
-                "- Select folder (SAF). Права не сохраняются (по требованию).\n" +
-                "- Нажмите Rename — процесс в корутинах; под кнопкой Status: working с анимацией."
+        return "Instructions:\n" +
+                "- Field 1: what to search for (usually an extension, e.g. .txt). Leave empty — all files.\n" +
+                "- Field 2: rename rule. Examples:\n" +
+                "    • .py — replace extension with .py\n" +
+                "    • IMG_\\$numb.jpg — sequence IMG_1.jpg, IMG_2.jpg …\n" +
+                "    • rev:IMG_\\$numb.jpg — same, but in reverse date order.\n" +
+                "- Flags: -I/-i (ignore case), -r (recursive). Can be combined: -ir, -ri or separated by spaces.\n" +
+                "- Select folder (SAF). Permissions are not persisted (by design).\n" +
+                "- Press Rename — the process runs in coroutines; Status below the button shows 'working' with animation."
     }
 
     private fun openFolderPicker() {
