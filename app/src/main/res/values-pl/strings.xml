@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Rust</string>
+    <string name="app_name">Syndes Kotlin Components</string>
 
     <string name="menu_file">Plik</string>
     <string name="menu_open">Otwórz</string>
