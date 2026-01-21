@@ -276,37 +276,82 @@ class BatchRenActivity : AppCompatActivity() {
     /**
      * Compute MIME type to use when creating the new file.
      * Priority:
-     * 1) If desiredName has extension and MimeTypeMap knows it -> use that MIME
-     * 2) Else if desiredName has extension but MimeTypeMap doesn't know it -> use application/octet-stream
-     * 3) Else (no extension in desiredName) -> use origMime fallback or application/octet-stream
+     * 1) If desiredName has extension and we know a MIME for it (explicit map) -> use it
+     * 2) Else ask MimeTypeMap.getMimeTypeFromExtension
+     * 3) If desiredName has extension but no known MIME -> use application/octet-stream
+     * 4) If desiredName has NO extension -> fallback to origMime or application/octet-stream
      *
-     * Also supports a small explicit map for extensions not covered by MimeTypeMap on some devices (e.g. kt).
+     * Большая явная мапа добавлена для популярных расширений и скриптов (включая .bat и .syd).
      */
     private fun computeMimeForName(desiredName: String, origMime: String?): String {
         val ext = getExtension(desiredName)
         if (ext != null && ext.length > 1) {
             val extNoDot = ext.substring(1).lowercase(Locale.getDefault())
 
-            // small explicit mapping for known-by-us extensions (helps when MimeTypeMap lacks them)
+            // Большая явная карта расширений -> MIME (можно дополнять)
             when (extNoDot) {
+                // Kotlin
                 "kt", "kts" -> return "text/x-kotlin"
+
+                // Python
                 "py" -> return "text/x-python"
+
+                // Java / C-family / C-like
+                "java" -> return "text/x-java-source"
+                "c" -> return "text/x-csrc"
+                "cpp", "cc", "cxx", "c++" -> return "text/x-c++src"
+                "h", "hpp", "hh" -> return "text/x-c++hdr"
+
+                // C#, Go, Rust, Swift, Scala, etc.
+                "cs" -> return "text/x-csharp"
+                "go" -> return "text/x-go"
+                "rs" -> return "text/rust"
+                "swift" -> return "text/x-swift"
+                "scala" -> return "text/x-scala"
+                "groovy" -> return "text/x-groovy"
+                "lua" -> return "text/x-lua"
+
+                // JS / TS / web
+                "js" -> return "application/javascript"
+                "ts" -> return "application/typescript"
+                "html", "htm" -> return "text/html"
+                "xhtml" -> return "application/xhtml+xml"
+                "css" -> return "text/css"
+                "json" -> return "application/json"
+                "xml" -> return "application/xml"
+
+                // Scripting / shell / batch / powershell / perl / ruby / php
+                "sh", "bash", "zsh" -> return "application/x-sh"
+                "ps1" -> return "text/plain" // powershell scripts as plain text for compatibility
+                "bat", "cmd" -> return "text/plain"
+                "pl" -> return "text/x-perl"
+                "rb" -> return "text/x-ruby"
+                "php" -> return "application/x-httpd-php"
+
+                // Others
+                "sql" -> return "application/sql"
                 "md" -> return "text/markdown"
-                // add more explicit mappings here if you need
+                "txt" -> return "text/plain"
+                "yml", "yaml" -> return "application/x-yaml"
+                "ini", "properties", "log" -> return "text/plain"
+
+                // Your custom extension: treat as plain text (you said it's txt-like)
+                "syd" -> return "text/plain"
             }
 
+            // If not in our explicit map, ask system map
             val map = MimeTypeMap.getSingleton()
             val mimeFromExt = map.getMimeTypeFromExtension(extNoDot)
             if (!mimeFromExt.isNullOrEmpty()) {
                 return mimeFromExt
             }
 
-            // If extension is explicitly present but MimeTypeMap doesn't know it,
-            // use a neutral binary mime so system won't append an old extension.
+            // Если расширение явное, но MimeTypeMap ничего не вернул — нейтральный бинарный mime,
+            // чтобы система не добавляла старое расширение (например .txt).
             return "application/octet-stream"
         }
 
-        // No extension in desiredName: prefer original MIME if available, else octet-stream
+        // В имени нет расширения — возвращаем оригинальный mime, если есть, иначе octet-stream
         return origMime ?: "application/octet-stream"
     }
 
