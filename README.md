@@ -1,4 +1,4 @@
-# Rust — Text Editor for Android
+# Rust — Text Editor for Android 
 
 A simple, lightweight text editor with a few practical features.  
 Designed for everyday notes, drafts, and personal writing.
