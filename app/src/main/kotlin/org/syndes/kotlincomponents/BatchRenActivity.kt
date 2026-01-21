@@ -60,8 +60,8 @@ class BatchRenActivity : AppCompatActivity() {
                 "- Field 1: what to search for (usually an extension, e.g. .txt). Leave empty — all files.\n" +
                 "- Field 2: rename rule. Examples:\n" +
                 "    • .py — replace extension with .py\n" +
-                "    • IMG_\\$numb.jpg — sequence IMG_1.jpg, IMG_2.jpg …\n" +
-                "    • rev:IMG_\\$numb.jpg — same, but in reverse date order.\n" +
+                "    • IMG_${'$'}numb.jpg — sequence IMG_1.jpg, IMG_2.jpg …\n" +
+                "    • rev:IMG_${'$'}numb.jpg — same, but in reverse date order.\n" +
                 "- Flags: -I/-i (ignore case), -r (recursive). Can be combined: -ir, -ri or separated by spaces.\n" +
                 "- Select folder (SAF). Permissions are not persisted (by design).\n" +
                 "- Press Rename — the process runs in coroutines; Status below the button shows 'working' with animation."
