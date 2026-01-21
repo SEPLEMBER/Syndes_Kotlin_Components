@@ -7,7 +7,7 @@ This module provides a set of Kotlin-based utilities focused on text processing,
 
 ## Included Tools
 
-1.Rust Text Editor. A lightweight text editor with enhanced privacy and security features.
+1. Rust Text Editor. A lightweight text editor with enhanced privacy and security features.
 
 2. Batch Text Replacement Tool. Allows fast bulk replacement of text across multiple files.
 
