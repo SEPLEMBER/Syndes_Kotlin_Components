@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">Rust</string>
 
-    <string name="menu_file">Файл</string>
+    <string name="menu_file">Syndes Kotlin Components</string>
     <string name="menu_open">Открыть</string>
     <string name="menu_save">Сохранить</string>
     <string name="menu_save_as">Сохранить как</string>
@@ -12,8 +12,8 @@
     <string name="menu_find">Найти</string>
     <string name="menu_undo">Отменить</string>
     <string name="menu_redo">Повторить</string>
-    <string name="menu_encrypt">Зашифровать</string>
-    <string name="menu_decrypt">Расшифровать</string>
+    <string name="menu_encrypt">Encrypt</string>
+    <string name="menu_decrypt">Decrypt</string>
     <string name="menu_settings">Настройки</string>
 
     <string name="settings_title">Настройки</string>
