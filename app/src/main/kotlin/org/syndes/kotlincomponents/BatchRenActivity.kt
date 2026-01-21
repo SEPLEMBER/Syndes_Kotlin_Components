@@ -37,6 +37,77 @@ class BatchRenActivity : AppCompatActivity() {
     private var treeDoc: DocumentFile? = null
     private var dotsJob: Job? = null
 
+    // --- explicit MIME map: add known mappings here ---
+    private val explicitMimeMap: Map<String, String> = mapOf(
+        // Kotlin
+        "kt" to "text/x-kotlin",
+        "kts" to "text/x-kotlin",
+
+        // Python
+        "py" to "text/x-python",
+
+        // Java / C-family / C-like
+        "java" to "text/x-java-source",
+        "c" to "text/x-csrc",
+        "cpp" to "text/x-c++src",
+        "cc" to "text/x-c++src",
+        "cxx" to "text/x-c++src",
+        "h" to "text/x-c++hdr",
+        "hpp" to "text/x-c++hdr",
+        "hh" to "text/x-c++hdr",
+
+        // C#, Go, Rust, Swift, Scala, etc.
+        "cs" to "text/x-csharp",
+        "go" to "text/x-go",
+        "rs" to "text/rust",
+        "swift" to "text/x-swift",
+        "scala" to "text/x-scala",
+        "groovy" to "text/x-groovy",
+        "lua" to "text/x-lua",
+
+        // JS / TS / web
+        "js" to "application/javascript",
+        "ts" to "application/typescript",
+        "html" to "text/html",
+        "htm" to "text/html",
+        "xhtml" to "application/xhtml+xml",
+        "css" to "text/css",
+        "json" to "application/json",
+        "xml" to "application/xml",
+
+        // Scripting / shell / batch / powershell / perl / ruby / php
+        "sh" to "application/x-sh",
+        "bash" to "application/x-sh",
+        "zsh" to "application/x-sh",
+        "ps1" to "text/plain", // powershell scripts as plain text for compatibility
+        "bat" to "text/plain",
+        "cmd" to "text/plain",
+        "pl" to "text/x-perl",
+        "rb" to "text/x-ruby",
+        "php" to "application/x-httpd-php",
+
+        // Others
+        "sql" to "application/sql",
+        "md" to "text/markdown",
+        "txt" to "text/plain",
+        "yml" to "application/x-yaml",
+        "yaml" to "application/x-yaml",
+        "ini" to "text/plain",
+        "properties" to "text/plain",
+        "log" to "text/plain",
+
+        // Your custom extension: treat as plain text (you said it's txt-like)
+        "syd" to "text/plain"
+    )
+
+    // Extensions we explicitly want to consider "text/plain" if MimeTypeMap doesn't know them.
+    // This prevents using origMime (which might be text/plain from the source), and reduces the
+    // chance of the provider appending an old extension like ".txt".
+    private val textLikeExtensions: Set<String> = setOf(
+        "txt", "md", "log", "ini", "properties", "ps1", "bat", "cmd", "syd"
+    )
+    // --- end of MIME-related fields ---
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_batch_ren)
@@ -56,6 +127,7 @@ class BatchRenActivity : AppCompatActivity() {
     }
 
     private fun buildInstructionText(): String {
+        // Note: includes an English memo about unstable plaintext-like extensions (no XML edits required)
         return "Instructions:\n" +
                 "- Field 1: what to search for (usually an extension, e.g. .txt). Leave empty — all files.\n" +
                 "- Field 2: rename rule. Examples:\n" +
@@ -64,7 +136,16 @@ class BatchRenActivity : AppCompatActivity() {
                 "    • rev:IMG_${'$'}numb.jpg — same, but in reverse date order.\n" +
                 "- Flags: -I/-i (ignore case), -r (recursive). Can be combined: -ir, -ri or separated by spaces.\n" +
                 "- Select folder (SAF). Permissions are not persisted (by design).\n" +
-                "- Press Rename — the process runs in coroutines; Status below the button shows 'working' with animation."
+                "- Press Rename — the process runs in coroutines; Status below the button shows 'working' with animation.\n\n" +
+                // English memo requested by user
+                "Note (English): Some target extensions may behave inconsistently across devices/providers. " +
+                "For example, when renaming to an extension that the system's MIME database doesn't know, " +
+                "the SAF provider may append the original file's extension (e.g. \".txt\") to the new name. " +
+                "To mitigate this, the app uses a curated MIME map and falls back to 'application/octet-stream' " +
+                "for unknown extensions. However there are no guarantees — behaviour depends on the device and storage provider.\n\n" +
+                "Extensions currently treated as plaintext by this app (may be unstable across devices):\n" +
+                "  .syd, .bat, .cmd, .ps1, .txt, .md, .ini, .log, .properties\n\n" +
+                "If you rely on a specific extension working without an extra \".txt\", consider adding it to the app's explicit map."
     }
 
     private fun openFolderPicker() {
@@ -278,86 +359,41 @@ class BatchRenActivity : AppCompatActivity() {
      * Priority:
      * 1) If desiredName has extension and we know a MIME for it (explicit map) -> use it
      * 2) Else ask MimeTypeMap.getMimeTypeFromExtension
-     * 3) If desiredName has extension but no known MIME -> use application/octet-stream
+     * 3) If desiredName has extension but no known MIME -> if ext in textLikeExtensions -> text/plain
+     *    else -> application/octet-stream
      * 4) If desiredName has NO extension -> fallback to origMime or application/octet-stream
-     *
-     * Большая явная мапа добавлена для популярных расширений и скриптов (включая .bat и .syd).
      */
     private fun computeMimeForName(desiredName: String, origMime: String?): String {
         val ext = getExtension(desiredName)
         if (ext != null && ext.length > 1) {
             val extNoDot = ext.substring(1).lowercase(Locale.getDefault())
 
-            // Большая явная карта расширений -> MIME (можно дополнять)
-            when (extNoDot) {
-                // Kotlin
-                "kt", "kts" -> return "text/x-kotlin"
+            // 1) explicit map (our curated list)
+            explicitMimeMap[extNoDot]?.let { return it }
 
-                // Python
-                "py" -> return "text/x-python"
-
-                // Java / C-family / C-like
-                "java" -> return "text/x-java-source"
-                "c" -> return "text/x-csrc"
-                "cpp", "cc", "cxx", "c++" -> return "text/x-c++src"
-                "h", "hpp", "hh" -> return "text/x-c++hdr"
-
-                // C#, Go, Rust, Swift, Scala, etc.
-                "cs" -> return "text/x-csharp"
-                "go" -> return "text/x-go"
-                "rs" -> return "text/rust"
-                "swift" -> return "text/x-swift"
-                "scala" -> return "text/x-scala"
-                "groovy" -> return "text/x-groovy"
-                "lua" -> return "text/x-lua"
-
-                // JS / TS / web
-                "js" -> return "application/javascript"
-                "ts" -> return "application/typescript"
-                "html", "htm" -> return "text/html"
-                "xhtml" -> return "application/xhtml+xml"
-                "css" -> return "text/css"
-                "json" -> return "application/json"
-                "xml" -> return "application/xml"
-
-                // Scripting / shell / batch / powershell / perl / ruby / php
-                "sh", "bash", "zsh" -> return "application/x-sh"
-                "ps1" -> return "text/plain" // powershell scripts as plain text for compatibility
-                "bat", "cmd" -> return "text/plain"
-                "pl" -> return "text/x-perl"
-                "rb" -> return "text/x-ruby"
-                "php" -> return "application/x-httpd-php"
-
-                // Others
-                "sql" -> return "application/sql"
-                "md" -> return "text/markdown"
-                "txt" -> return "text/plain"
-                "yml", "yaml" -> return "application/x-yaml"
-                "ini", "properties", "log" -> return "text/plain"
-
-                // Your custom extension: treat as plain text (you said it's txt-like)
-                "syd" -> return "text/plain"
-            }
-
-            // If not in our explicit map, ask system map
+            // 2) system map
             val map = MimeTypeMap.getSingleton()
             val mimeFromExt = map.getMimeTypeFromExtension(extNoDot)
             if (!mimeFromExt.isNullOrEmpty()) {
                 return mimeFromExt
             }
 
-            // Если расширение явное, но MimeTypeMap ничего не вернул — нейтральный бинарный mime,
-            // чтобы система не добавляла старое расширение (например .txt).
-            return "application/octet-stream"
+            // 3) fallback for explicit extension:
+            //    if we think it's text-like -> text/plain, else neutral binary
+            return if (textLikeExtensions.contains(extNoDot)) {
+                "text/plain"
+            } else {
+                "application/octet-stream"
+            }
         }
 
-        // В имени нет расширения — возвращаем оригинальный mime, если есть, иначе octet-stream
+        // No extension in desiredName -> safe to reuse original mime or octet-stream
         return origMime ?: "application/octet-stream"
     }
 
     /**
      * Copy file bytes (in RAM), create new file with MIME derived from desired name (important),
-     * then delete source only after successful write.
+     * then delete source only after successful write. On write failure the created partial file is removed.
      */
     private fun safeCopyAndReplace(source: DocumentFile, parent: DocumentFile, desiredName: String) {
         val origUri = source.uri
@@ -369,16 +405,34 @@ class BatchRenActivity : AppCompatActivity() {
         val desiredMime = computeMimeForName(desiredName, origMime)
 
         // create file with desired MIME and the exact desiredName
-        val created = parent.createFile(desiredMime, desiredName)
-            ?: throw RuntimeException("Cannot create file $desiredName in ${parent.uri}")
+        val created = try {
+            parent.createFile(desiredMime, desiredName)
+        } catch (e: Exception) {
+            throw RuntimeException("Cannot create file $desiredName in ${parent.uri}: ${e.message}", e)
+        } ?: throw RuntimeException("Cannot create file $desiredName in ${parent.uri} (returned null)")
 
-        contentResolver.openOutputStream(created.uri)?.use { os ->
-            os.write(bytes)
-            os.flush()
-        } ?: throw RuntimeException("Cannot open output for ${created.uri}")
+        var wroteOk = false
+        try {
+            contentResolver.openOutputStream(created.uri)?.use { os ->
+                os.write(bytes)
+                os.flush()
+                wroteOk = true
+            } ?: throw RuntimeException("Cannot open output for ${created.uri}")
+        } catch (t: Throwable) {
+            // try to remove partially written file; ignore errors during delete
+            try { created.delete() } catch (_: Throwable) { /* ignore */ }
+            throw RuntimeException("Failed to write to ${created.uri}: ${t.message}", t)
+        }
 
-        // delete original AFTER successful create/write
-        source.delete()
+        if (wroteOk) {
+            // only after successful write — delete the original
+            try {
+                source.delete()
+            } catch (t: Throwable) {
+                // If deletion failed, leave created file and report via status text (we don't throw here).
+                // Could log this for debugging if desired.
+            }
+        }
     }
 
     private fun readBytesFromUri(uri: Uri): ByteArray {
