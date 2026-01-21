@@ -277,17 +277,36 @@ class BatchRenActivity : AppCompatActivity() {
      * Compute MIME type to use when creating the new file.
      * Priority:
      * 1) If desiredName has extension and MimeTypeMap knows it -> use that MIME
-     * 2) Else use origMime (from source)
-     * 3) Else "application/octet-stream"
+     * 2) Else if desiredName has extension but MimeTypeMap doesn't know it -> use application/octet-stream
+     * 3) Else (no extension in desiredName) -> use origMime fallback or application/octet-stream
+     *
+     * Also supports a small explicit map for extensions not covered by MimeTypeMap on some devices (e.g. kt).
      */
     private fun computeMimeForName(desiredName: String, origMime: String?): String {
         val ext = getExtension(desiredName)
         if (ext != null && ext.length > 1) {
             val extNoDot = ext.substring(1).lowercase(Locale.getDefault())
+
+            // small explicit mapping for known-by-us extensions (helps when MimeTypeMap lacks them)
+            when (extNoDot) {
+                "kt", "kts" -> return "text/x-kotlin"
+                "py" -> return "text/x-python"
+                "md" -> return "text/markdown"
+                // add more explicit mappings here if you need
+            }
+
             val map = MimeTypeMap.getSingleton()
             val mimeFromExt = map.getMimeTypeFromExtension(extNoDot)
-            if (!mimeFromExt.isNullOrEmpty()) return mimeFromExt
+            if (!mimeFromExt.isNullOrEmpty()) {
+                return mimeFromExt
+            }
+
+            // If extension is explicitly present but MimeTypeMap doesn't know it,
+            // use a neutral binary mime so system won't append an old extension.
+            return "application/octet-stream"
         }
+
+        // No extension in desiredName: prefer original MIME if available, else octet-stream
         return origMime ?: "application/octet-stream"
     }
 
