@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Rust</string>
+    <string name="app_name">Syndes Kotlin Components</string>
 
-    <string name="menu_file">Syndes Kotlin Components</string>
+    <string name="menu_file">Файл</string>
     <string name="menu_open">Открыть</string>
     <string name="menu_save">Сохранить</string>
     <string name="menu_save_as">Сохранить как</string>
