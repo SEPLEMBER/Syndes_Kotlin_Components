@@ -55,6 +55,7 @@
                 android:overScrollMode="ifContentScrolls"
                 android:padding="8dp"
                 android:lineSpacingExtra="2dp"
+                android:freezesText="false"
                 android:importantForAutofill="no"
                 android:saveEnabled="false"
                 android:hint="@string/editor_hint" />
@@ -67,6 +68,7 @@
                 android:text="@string/empty_hint"
                 android:textColor="#9E9E9E"
                 android:saveEnabled="false"
+                android:freezesText="false"
                 android:alpha="0.9"
                 android:layout_gravity="center"
                 android:visibility="gone"/>
