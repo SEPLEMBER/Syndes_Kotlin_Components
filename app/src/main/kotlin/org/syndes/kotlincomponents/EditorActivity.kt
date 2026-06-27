@@ -679,7 +679,7 @@ class EditorActivity : AppCompatActivity() {
         // amber takes precedence if enabled
         if (amber) {
             binding.editor.setShadowLayer(0f, 0f, 0f, Color.TRANSPARENT)
-            binding.editor.setTextColor(Color.parseColor("#FFBF00")) // amber
+            binding.editor.setTextColor(Color.parseColor("#ff00FFFF")) // amber
         } else if (retro) {
             binding.editor.setShadowLayer(0f, 0f, 0f, Color.TRANSPARENT)
             binding.editor.setTextColor(Color.parseColor("#ff00ff00"))
