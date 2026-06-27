@@ -343,8 +343,8 @@ class EditorActivity : AppCompatActivity() {
                 true
             }
             // note: removed reference to R.id.action_load_syntax to avoid resource missing errors.
-            R.id.action_encrypt -> { promptEncryptCurrent(); true }
-            R.id.action_decrypt -> { promptDecryptCurrent(); true }
+            R.id.action_Coding -> { promptCodingCurrent(); true }
+            R.id.action_Uncoding -> { promptUncodingCurrent(); true }
             R.id.action_settings -> {
                 try {
                     val intent = Intent(this, SettingsActivity::class.java)
@@ -1326,14 +1326,14 @@ class EditorActivity : AppCompatActivity() {
         scheduleHighlight()
     }
 
-    // ---------- ENCRYPT / DECRYPT ----------
-    private fun promptEncryptCurrent() {
+    // ---------- Coding / Uncoding ----------
+    private fun promptCodingCurrent() {
         val input = EditText(this)
         input.hint = getString(R.string.hint_password)
         val dlg = AlertDialog.Builder(this)
-            .setTitle(getString(R.string.dialog_encrypt_title))
+            .setTitle(getString(R.string.dialog_Coding_title))
             .setView(input)
-            .setPositiveButton(getString(R.string.encrypt_button), null)
+            .setPositiveButton(getString(R.string.Coding_button), null)
             .setNegativeButton(getString(R.string.cancel_button), null)
             .create()
 
@@ -1343,19 +1343,19 @@ class EditorActivity : AppCompatActivity() {
                 val pw = input.text.toString()
                 if (pw.isEmpty()) { Toast.makeText(this, getString(R.string.toast_password_required), Toast.LENGTH_SHORT).show(); return@setOnClickListener }
                 dlg.dismiss()
-                performEncrypt(pw.toCharArray())
+                performCoding(pw.toCharArray())
             }
         }
         dlg.show()
     }
 
-    private fun promptDecryptCurrent() {
+    private fun promptUncodingCurrent() {
         val input = EditText(this)
         input.hint = getString(R.string.hint_password)
         val dlg = AlertDialog.Builder(this)
-            .setTitle(getString(R.string.dialog_decrypt_title))
+            .setTitle(getString(R.string.dialog_Uncoding_title))
             .setView(input)
-            .setPositiveButton(getString(R.string.decrypt_button), null)
+            .setPositiveButton(getString(R.string.Uncoding_button), null)
             .setNegativeButton(getString(R.string.cancel_button), null)
             .create()
 
@@ -1365,18 +1365,18 @@ class EditorActivity : AppCompatActivity() {
                 val pw = input.text.toString()
                 if (pw.isEmpty()) { Toast.makeText(this, getString(R.string.toast_password_required), Toast.LENGTH_SHORT).show(); return@setOnClickListener }
                 dlg.dismiss()
-                performDecrypt(pw.toCharArray())
+                performUncoding(pw.toCharArray())
             }
         }
         dlg.show()
     }
 
-    private fun performEncrypt(password: CharArray) {
+    private fun performCoding(password: CharArray) {
         val plain = binding.editor.text?.toString() ?: ""
-        if (plain.isEmpty()) { Toast.makeText(this, getString(R.string.toast_nothing_to_encrypt), Toast.LENGTH_SHORT).show(); return }
+        if (plain.isEmpty()) { Toast.makeText(this, getString(R.string.toast_nothing_to_Coding), Toast.LENGTH_SHORT).show(); return }
         val waitDlg = AlertDialog.Builder(this)
-            .setTitle(getString(R.string.dialog_encrypting_title))
-            .setMessage(getString(R.string.dialog_encrypting_message))
+            .setTitle(getString(R.string.dialog_Codinging_title))
+            .setMessage(getString(R.string.dialog_Codinging_message))
             .setCancelable(false)
             .create()
         waitDlg.show()
@@ -1386,7 +1386,7 @@ class EditorActivity : AppCompatActivity() {
             while (isActive) {
                 withContext(Dispatchers.Main) {
                     waitDlg.setMessage(
-                        getString(R.string.dialog_encrypting_message) + ".".repeat(dots)
+                        getString(R.string.dialog_Codinging_message) + ".".repeat(dots)
                     )
                 }
                 dots = (dots + 1) % 4
@@ -1396,18 +1396,18 @@ class EditorActivity : AppCompatActivity() {
 
         lifecycleScope.launch(bgDispatcher) {
             try {
-                val encrypted = Secure.encrypt(password, plain)
+                val Codinged = Secure.Coding(password, plain)
                 withContext(Dispatchers.Main) {
                     ignoreTextWatcher = true
-                    binding.editor.setText(encrypted, TextView.BufferType.EDITABLE)
+                    binding.editor.setText(Codinged, TextView.BufferType.EDITABLE)
                     binding.editor.setSelection(0)
                     ignoreTextWatcher = false
                     scheduleStatsUpdate()
-                    pushHistorySnapshot(encrypted)
-                    Toast.makeText(this@EditorActivity, getString(R.string.toast_encrypt_done), Toast.LENGTH_SHORT).show()
+                    pushHistorySnapshot(Codinged)
+                    Toast.makeText(this@EditorActivity, getString(R.string.toast_Coding_done), Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
-                withContext(Dispatchers.Main) { Toast.makeText(this@EditorActivity, getString(R.string.toast_encryption_failed, e.localizedMessage), Toast.LENGTH_LONG).show() }
+                withContext(Dispatchers.Main) { Toast.makeText(this@EditorActivity, getString(R.string.toast_Codingion_failed, e.localizedMessage), Toast.LENGTH_LONG).show() }
             } finally {
                 dotsJob.cancel()
                 withContext(Dispatchers.Main) { waitDlg.dismiss() }
@@ -1415,20 +1415,20 @@ class EditorActivity : AppCompatActivity() {
         }
     }
 
-    private fun performDecrypt(password: CharArray) {
-        val encrypted = binding.editor.text?.toString() ?: ""
-        if (encrypted.isEmpty()) {
+    private fun performUncoding(password: CharArray) {
+        val Codinged = binding.editor.text?.toString() ?: ""
+        if (Codinged.isEmpty()) {
             Toast.makeText(
                 this,
-                getString(R.string.toast_nothing_to_decrypt),
+                getString(R.string.toast_nothing_to_Uncoding),
                 Toast.LENGTH_SHORT
             ).show()
             return
         }
 
         val waitDlg = AlertDialog.Builder(this)
-            .setTitle(getString(R.string.dialog_decrypting_title))
-            .setMessage(getString(R.string.dialog_decrypting_message))
+            .setTitle(getString(R.string.dialog_Uncodinging_title))
+            .setMessage(getString(R.string.dialog_Uncodinging_message))
             .setCancelable(false)
             .create()
         waitDlg.show()
@@ -1438,7 +1438,7 @@ class EditorActivity : AppCompatActivity() {
             while (isActive) {
                 withContext(Dispatchers.Main) {
                     waitDlg.setMessage(
-                        getString(R.string.dialog_decrypting_message) + ".".repeat(dots)
+                        getString(R.string.dialog_Uncodinging_message) + ".".repeat(dots)
                     )
                 }
                 dots = (dots + 1) % 4
@@ -1448,7 +1448,7 @@ class EditorActivity : AppCompatActivity() {
 
         lifecycleScope.launch(bgDispatcher) {
             try {
-                val plain = Secure.decrypt(password, encrypted)
+                val plain = Secure.Uncoding(password, Codinged)
                 withContext(Dispatchers.Main) {
                     ignoreTextWatcher = true
                     binding.editor.setText(plain, TextView.BufferType.EDITABLE)
@@ -1458,12 +1458,12 @@ class EditorActivity : AppCompatActivity() {
                     pushHistorySnapshot(plain)
                     Toast.makeText(
                         this@EditorActivity,
-                        getString(R.string.toast_decrypt_done),
+                        getString(R.string.toast_Uncoding_done),
                         Toast.LENGTH_SHORT
                     ).show()
                 }
             } catch (e: Exception) {
-                withContext(Dispatchers.Main) { Toast.makeText(this@EditorActivity, getString(R.string.toast_decryption_failed, e.localizedMessage), Toast.LENGTH_LONG).show() }
+                withContext(Dispatchers.Main) { Toast.makeText(this@EditorActivity, getString(R.string.toast_Uncodingion_failed, e.localizedMessage), Toast.LENGTH_LONG).show() }
             } finally {
                 dotsJob.cancel()
                 withContext(Dispatchers.Main) { waitDlg.dismiss() }
