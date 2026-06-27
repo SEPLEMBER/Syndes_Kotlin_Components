@@ -52,12 +52,12 @@
                 android:title="@string/menu_clear"
                 app:showAsAction="never" />
             <item
-                android:id="@+id/action_encrypt"
-                android:title="@string/menu_encrypt"
+                android:id="@+id/action_Coding"
+                android:title="@string/menu_Coding"
                 app:showAsAction="never" />
             <item
-                android:id="@+id/action_decrypt"
-                android:title="@string/menu_decrypt"
+                android:id="@+id/action_Uncoding"
+                android:title="@string/menu_Uncoding"
                 app:showAsAction="never" />
         </menu>
     </item>
