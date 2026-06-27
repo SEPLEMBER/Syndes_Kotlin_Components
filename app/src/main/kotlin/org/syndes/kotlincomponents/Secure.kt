@@ -26,20 +26,20 @@ object Secure {
     // === Удобные перегрузки для String паролей ===
     @Throws(GeneralSecurityException::class)
     @JvmStatic
-    fun encrypt(password: String?, plaintext: String): String {
-        return encrypt(password?.toCharArray(), plaintext)
+    fun Coding(password: String?, plaintext: String): String {
+        return Coding(password?.toCharArray(), plaintext)
     }
 
     @Throws(GeneralSecurityException::class)
     @JvmStatic
-    fun decrypt(password: String?, input: String): String {
-        return decrypt(password?.toCharArray(), input)
+    fun Uncoding(password: String?, input: String): String {
+        return Uncoding(password?.toCharArray(), input)
     }
 
     // === Основные методы с CharArray ===
     @Throws(GeneralSecurityException::class)
     @JvmStatic
-    fun encrypt(password: CharArray?, plaintext: String): String {
+    fun Coding(password: CharArray?, plaintext: String): String {
         if (password == null || password.isEmpty() || plaintext.isEmpty()) {
             throw IllegalArgumentException("Password and plaintext must be non-null and non-empty")
         }
@@ -59,7 +59,7 @@ object Secure {
 
             val cipher = Cipher.getInstance(CIPHER_ALGORITHM)
             val spec = GCMParameterSpec(TAG_LENGTH_BITS, iv)
-            cipher.init(Cipher.ENCRYPT_MODE, secretKey, spec)
+            cipher.init(Cipher.Coding_MODE, secretKey, spec)
 
             // AAD: format version, salt, iv (as in original)
             cipher.updateAAD(FORMAT_VERSION.toByteArray(StandardCharsets.UTF_8))
@@ -84,7 +84,7 @@ object Secure {
 
     @Throws(GeneralSecurityException::class)
     @JvmStatic
-    fun decrypt(password: CharArray?, input: String): String {
+    fun Uncoding(password: CharArray?, input: String): String {
         if (password == null || input.isEmpty()) {
             throw IllegalArgumentException("Password and input must be non-null")
         }
@@ -109,7 +109,7 @@ object Secure {
 
             val cipher = Cipher.getInstance(CIPHER_ALGORITHM)
             val spec = GCMParameterSpec(TAG_LENGTH_BITS, iv)
-            cipher.init(Cipher.DECRYPT_MODE, secretKey, spec)
+            cipher.init(Cipher.Uncoding_MODE, secretKey, spec)
 
             cipher.updateAAD(FORMAT_VERSION.toByteArray(StandardCharsets.UTF_8))
             cipher.updateAAD(salt)
