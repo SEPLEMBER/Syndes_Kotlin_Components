@@ -3,146 +3,148 @@
     <string name="app_name">Syndes Kotlin Components</string>
 
     <string name="menu_file">Файл</string>
-    <string name="menu_open">Відкрити</string>
-    <string name="menu_save">Зберегти</string>
-    <string name="menu_save_as">Зберегти як</string>
-    <string name="menu_edit">Редагувати</string>
-    <string name="menu_copy">Копіювати</string>
-    <string name="menu_paste">Вставити</string>
-    <string name="menu_find">Знайти</string>
-    <string name="menu_undo">Скасувати</string>
-    <string name="menu_redo">Повторити</string>
-    <string name="menu_encrypt">Зашифрувати</string>
-    <string name="menu_decrypt">Розшифрувати</string>
-    <string name="menu_settings">Налаштування</string>
+    <string name="menu_open">Открыть</string>
+    <string name="menu_save">Сохранить</string>
+    <string name="menu_save_as">Сохранить как</string>
+    <string name="menu_edit">Править</string>
+    <string name="menu_copy">Копировать</string>
+    <string name="menu_paste">Вставить</string>
+    <string name="menu_find">Найти</string>
+    <string name="menu_undo">Отменить</string>
+    <string name="menu_redo">Повторить</string>
+    <string name="menu_Coding">Coding</string>
+    <string name="menu_Uncoding">Uncoding</string>
+    <string name="menu_settings">Настройки</string>
 
-    <string name="settings_title">Налаштування</string>
-    <string name="settings_prevent_screenshots">Заборонити знімки екрана</string>
-    <string name="settings_undo_enabled">Увімкнути скасування/повернення</string>
-    <string name="settings_dark_theme">Темна тема</string>
-    <string name="settings_screenshots_protected">Знімки екрана заблоковано</string>
-    <string name="settings_screenshots_allowed">Знімки екрана дозволені</string>
-    <string name="settings_undo_on">Скасування увімкнено</string>
-    <string name="settings_undo_off">Скасування вимкнено</string>
-    <string name="settings_theme_changed">Тему змінено</string>
-    <string name="settings_font_size">Розмір шрифту</string>
-    <string name="settings_font_small">Малий</string>
-    <string name="settings_font_normal">Звичайний</string>
-    <string name="settings_font_medium">Середній</string>
-    <string name="settings_font_large">Великий</string>
-    <string name="settings_font_changed">Збережено розмір шрифту: %1$s</string>
-    <string name="settings_formatting_support">Підтримка форматування</string>
-    <string name="settings_line_numbers">Показувати номери рядків</string>
-    <string name="settings_retro_mode">Ретро режим</string>
-    <string name="settings_syntax_highlight">Підсвічування синтаксису (нестабільний тест)</string>
+    <string name="settings_title">Настройки</string>
+    <string name="settings_prevent_screenshots">Запретить снимки экрана</string>
+    <string name="settings_undo_enabled">Включить отмену/повтор</string>
+    <string name="settings_dark_theme">Тёмная тема</string>
+    <string name="settings_screenshots_protected">Снимки экрана теперь запрещены</string>
+    <string name="settings_screenshots_allowed">Снимки экрана разрешены</string>
+    <string name="settings_undo_on">Отмена включена</string>
+    <string name="settings_undo_off">Отмена отключена</string>
+    <string name="settings_theme_changed">Тема изменена</string>
+    <string name="settings_font_size">Размер шрифта</string>
+    <string name="settings_font_small">Маленький</string>
+    <string name="settings_font_normal">Обычный</string>
+    <string name="settings_font_medium">Средний</string>
+    <string name="settings_font_large">Большой</string>
+    <string name="settings_font_changed">Размер шрифта сохранён: %1$s</string>
+    <string name="settings_formatting_support">Поддержка форматирования</string>
+    <string name="settings_line_numbers">Показывать номера строк</string>
+    <string name="settings_retro_mode">Ретро-режим</string>
+    <string name="settings_syntax_highlight">Подсветка синтаксиса (нестабильно) </string>
 
-    <string name="settings_format_on">Форматування увімкнено</string>
-    <string name="settings_format_off">Форматування вимкнено</string>
+    <string name="settings_format_on">Форматирование включено</string>
+    <string name="settings_format_off">Форматирование отключено</string>
 
-    <string name="settings_line_numbers_on">Номери рядків увімкнено</string>
-    <string name="settings_line_numbers_off">Номери рядків вимкнено</string>
+    <string name="settings_line_numbers_on">Номера строк включены</string>
+    <string name="settings_line_numbers_off">Номера строк отключены</string>
 
-    <string name="settings_retro_on">Ретро режим увімкнено</string>
-    <string name="settings_retro_off">Ретро режим вимкнено</string>
+    <string name="settings_retro_on">Ретро-режим включён</string>
+    <string name="settings_retro_off">Ретро-режим отключён</string>
 
-    <string name="settings_syntax_on">Підсвічування синтаксису увімкнено</string>
-    <string name="settings_syntax_off">Підсвічування синтаксису вимкнено</string>
-    <string name="settings_amber_mode">Режим Amber</string>
-    <string name="settings_language">Мова</string>
+    <string name="settings_syntax_on">Подсветка синтаксиса включена</string>
+    <string name="settings_syntax_off">Подсветка синтаксиса отключена</string>
+    <string name="settings_amber_mode">Янтарный режим</string>
+    <string name="settings_language">Язык</string>
 
-    <string name="settings_amber_on">Тема Amber увімкнена</string>
-    <string name="settings_amber_off">Тема Amber вимкнена</string>
+    <string name="settings_amber_on">Янтарная тема включена</string>
+    <string name="settings_amber_off">Янтарная тема отключена</string>
 
-    <string name="settings_language_changed">Мова програмування змінено %s</string>
+    <string name="settings_language_changed">Язык программирования изменён на %s</string>
 
-    <string name="menu_select_all">Усе</string>
+    <string name="menu_select_all">Выделить всё</string>
 
-    <string name="find_hint">Знайти (використайте :123 щоб перейти до рядка 123)</string>
-    <string name="replace_hint">Заміна на</string>
-    <string name="matches_count">Збіги: 0</string>
+    <string name="find_hint">Поиск (впишите :123 для перехода к строке 123)</string>
+    <string name="replace_hint">Заменить на</string>
+    <string name="matches_count">Совпадений: 0</string>
 
-    <string name="menu_quick">Швидко</string>
-    <string name="menu_clear">Очистити</string>
-    <string name="menu_about">Про</string>
+    <string name="menu_quick">Быстрое</string>
+    <string name="menu_clear">Очистить</string>
+    <string name="menu_about">О программе</string>
     <string name="textRust">Rust</string>
-    <string name="stats_default">Слів: 0 | Символів: 0</string>
-    <string name="editor_hint">Почніть вводити...</string>
+    <string name="stats_default">Слов: 0 | Символов: 0</string>
+    <string name="editor_hint">Начните печатать...</string>
     <string name="empty_hint">...</string>
-    <string name="jump_top">Перейти в початок</string>
-    <string name="jump_bottom">Перейти в кінець</string>
-    <string name="close_button">Закрити</string>
-    <string name="no_current_match_to_replace">Немає поточного збігу для заміни</string>
-    <string name="replaced_all">Замінено всі</string>
+    <string name="jump_top">Перейти к началу</string>
+    <string name="jump_bottom">Перейти к концу</string>
+    <string name="close_button">Закрыть</string>
+<string name="no_current_match_to_replace">Нет текущего совпадения для замены</string>
+    <string name="replaced_all">Всё заменено</string>
 
-    <string name="section_tutorial_title">📖 Інструкції та поради</string>
+    <string name="section_tutorial_title">📖 Инструкции и советы</string>
 
-    <string name="section_tutorial_item1">1. Підтримується швидке прокручування: рух праворуч-ліворуч і вгору або вниз. Швидка навігація до початку чи кінця файлу доступна при натисканні у верхньому або нижньому правому куті.</string>
+    <string name="section_tutorial_item1">1. Поддерживается быстрая прокрутка: проведите пальцем справа налево и вверх или вниз. Быстрая навигация к началу или концу файла доступна при касании верхнего или нижнего правого угла.</string>
 
-    <string name="section_tutorial_item2">2. Підтримується швидке копіювання: утримуйте в будь-якому місці та використовуйте кнопку «Усе». Швидке видалення тексту також доступне через «Усе» + «DEL» на клавіатурі.</string>
+    <string name="section_tutorial_item2">2. Поддерживается быстрое копирование: длительное нажатие в любом месте + кнопка «ВСЁ». Также доступно быстрое удаление текста: «ВСЁ» + «DELETE» (на клавиатуре).</string>
 
-    <string name="section_tutorial_item3">3. Редагування дуже великих файлів може вимагати значних ресурсів залежно від пристрою. У більшості сценаріїв (до 100 000 символів або більше) редактор працює нормально.</string>
+    <string name="section_tutorial_item3">3. Редактирование очень больших файлов может быть ресурсоёмким в зависимости от устройства. Однако для большинства сценариев (до 100 000 символов или более) проблемы обычно не возникают.</string>
 
-    <string name="section_tutorial_item4">4. Після зміни налаштувань підсвічування синтаксису рекомендується перезапустити додаток.</string>
+    <string name="section_tutorial_item4">4. После изменения настроек подсветки синтаксиса рекомендуется перезапустить приложение.</string>
 
-    <string name="section_tutorial_item5">5. Захист даних реалізовано за допомогою AES-GCM з HMAC-SHA256 та PBKDF2 (75 000 ітерацій). Використовуйте довільний і достатньо складний пароль для надійного захисту. Примітка: слабкий пароль ослаблює криптографічні засоби; для чутливих даних використовуйте менеджер паролів.</string>
+    <string name="section_tutorial_item5">5. Кодировка UTF-8.</string>
 
-    <string name="section_tutorial_item6">6. Цей редактор є частиною екосистеми Syndes. Використання для робочих завдань дозволено і не обмежується ліцензією. Проєкт безкоштовний і поширюється як відкритий код.</string>
+    <string name="section_tutorial_item6">6. Этот редактор является частью экосистемы Syndes. Использование для рабочих задач разрешено и не ограничено лицензией. Проект бесплатный и распространяется с открытым исходным кодом.</string>
 
-    <string name="section_tutorial_item7">7. Відмова від відповідальності: розробники не несуть відповідальності за наслідки використання редактора. Ми прагнемо забезпечити надійне програмне забезпечення, проте повна стабільність не гарантується. Регулярні резервні копії знижують ризик втрати даних.</string>
+    <string name="section_tutorial_item7">7. Отказ от ответственности: Разработчики не несут ответственности за любые последствия использования редактора. Мы стремимся предоставить максимально надёжное программное обеспечение, но полная стабильность не может быть гарантирована. Регулярное резервное копирование файлов значительно снижает риск потери данных.</string>
 
-    <!-- Dialog / toast strings -->
-    <string name="dialog_find_replace_title">Знайти / Замінити</string>
-    <string name="dialog_encrypting_title">Шифрування</string>
-    <string name="dialog_encrypting_message">Будь ласка, зачекайте</string>
-    <string name="toast_encrypt_done">Шифрування завершено</string>
+    <!-- Диалоги / тосты -->
+    <string name="dialog_find_replace_title">Найти / Заменить</string>
+    <string name="dialog_Codinging_title">кодировка</string>
+    <string name="dialog_Codinging_message">Пожалуйста, подождите</string>
+    <string name="toast_Coding_done">кодировка завершено</string>
 
-    <string name="dialog_decrypting_title">Розшифрування</string>
-    <string name="dialog_decrypting_message">Будь ласка, зачекайте</string>
-    <string name="toast_decrypt_done">Розшифрування завершено</string>
-    <string name="toast_nothing_to_decrypt">Немає даних для розшифрування</string>
-    <string name="toast_amber_on">Тема Amber увімкнена</string>
-    <string name="toast_amber_off">Тема Amber вимкнена</string>
-    <string name="toast_language_set">Мову встановлено: %1$s</string>
-    <string name="toast_syntax_mapping_loaded">Мапа синтаксису завантажена</string>
-    <string name="toast_copied">Скопійовано</string>
-    <string name="toast_nothing_to_copy">Немає нічого для копіювання</string>
-    <string name="toast_pasted">Вставлено</string>
-    <string name="toast_clipboard_empty">Буфер обміну порожній</string>
-    <string name="dialog_clear_document_title">Очистити документ</string>
-    <string name="dialog_clear_document_message">Ви впевнені, що хочете очистити весь документ? Цю дію можна скасувати (якщо скасування увімкнено).</string>
-    <string name="clear_button">Очистити</string>
-    <string name="cancel_button">Скасувати</string>
-    <string name="toast_file_opened">Файл відкрито</string>
-    <string name="toast_error_opening_file">Помилка відкриття файлу: %1$s</string>
-    <string name="error_cannot_open_output_stream">Не вдалося відкрити вихідний потік</string>
-    <string name="toast_saved">Збережено</string>
-    <string name="toast_error_saving_file">Помилка збереження файлу: %1$s</string>
-    <string name="label_go_to_line">Перейти до рядка</string>
-    <string name="label_matches_count">%1$d збігів</string>
-    <string name="toast_no_matches">Немає збігів</string>
-    <string name="toast_query_empty">Порожній запит</string>
-    <string name="toast_undo_disabled">Скасування вимкнено в налаштуваннях</string>
-    <string name="toast_nothing_to_undo">Немає нічого для скасування</string>
-    <string name="toast_nothing_to_redo">Немає нічого для повторення</string>
-    <string name="hint_password">Пароль</string>
-    <string name="dialog_encrypt_title">Зашифрувати</string>
-    <string name="encrypt_button">Зашифрувати</string>
-    <string name="toast_password_required">Потрібний пароль</string>
-    <string name="dialog_decrypt_title">Розшифрувати</string>
-    <string name="decrypt_button">Розшифрувати</string>
-    <string name="toast_nothing_to_encrypt">Немає нічого для шифрування</string>
-    <string name="toast_encryption_failed">Шифрування не вдалося: %1$s</string>
-    <string name="toast_decryption_failed">Розшифрування не вдалося: %1$s</string>
-    <string name="dialog_settings_title">Налаштування</string>
-    <string name="dialog_settings_message">Доступні налаштування:\n• Заборонити знімки екрана: %1$b\n• Скасування увімкнено: %2$b\n• Темна тема: %3$b\n• Розмір шрифту: %4$s\n• Форматування: %5$b\n• Номери рядків (ігноруються): %6$b\n• Ретро: %7$b\n• Підсвічування синтаксису: %8$b\n\nВідкрийте SettingsActivity, щоб змінити ці параметри.</string>
-    <string name="ok_button">OK</string>
-    <string name="toast_unable_open_file_picker">Не вдалося відкрити провідник файлів для мапи синтаксису</string>
-    <string name="toast_failed_read_mapping_file">Не вдалося прочитати файл мапи: %1$s</string>
-    <string name="toast_failed_read_mapping_asset">Не вдалося прочитати ресурс мапи: %1$s</string>
-    
-    <string name="section_developers_title">👨‍💻 Розробники</string>
-    <string name="section_developers_text">Проєкт Syndes, вересень 2025. Відкритий проєкт з відкритим вихідним кодом, створений волонтерами та доступний для спільноти.</string>
+    <string name="dialog_Uncodinging_title">Раскодировка</string>
+    <string name="dialog_Uncodinging_message">Пожалуйста, подождите</string>
+    <string name="toast_Uncoding_done">Раскодировка завершена</string>
+    <string name="toast_nothing_to_Uncoding">Нечего раскодировывать</string>
 
-    <string name="section_license_title">📜 Ліцензія</string>
-    <string name="section_license_text">Цей некомерційний додаток поширюється за ліцензією Apache License 2.0.&#10;Використання, модифікація та форк дозволені. Будь ласка, збережіть вказівку на оригінальний проєкт: "Based on the Rust editor by Syndes Project" принаймні в розділі "Про".&#10;Повний текст ліцензії див. у файлі LICENSE.</string>
+    <string name="toast_amber_on">Режим янтаря включён</string>
+    <string name="toast_amber_off">Режим янтаря выключен</string>
+
+    <string name="toast_language_set">Язык установлен: %1$s</string>
+    <string name="toast_syntax_mapping_loaded">Карта синтаксиса загружена</string>
+<string name="toast_copied">Скопировано</string>
+<string name="toast_nothing_to_copy">Нечего копировать</string>
+<string name="toast_pasted">Вставлено</string>
+<string name="toast_clipboard_empty">Буфер обмена пуст</string>
+<string name="dialog_clear_document_title">Очистить документ</string>
+<string name="dialog_clear_document_message">Вы уверены, что хотите полностью очистить документ? Это действие можно отменить (если функция отмены включена).</string>
+<string name="clear_button">Очистить</string>
+<string name="cancel_button">Отмена</string>
+<string name="toast_file_opened">Файл открыт</string>
+<string name="toast_error_opening_file">Ошибка открытия файла: %1$s</string>
+<string name="error_cannot_open_output_stream">Не удалось открыть поток вывода</string>
+<string name="toast_saved">Сохранено</string>
+<string name="toast_error_saving_file">Ошибка сохранения файла: %1$s</string>
+<string name="label_go_to_line">Перейти к строке</string>
+<string name="label_matches_count">Совпадений: %1$d</string>
+<string name="toast_no_matches">Нет совпадений</string>
+<string name="toast_query_empty">Запрос пуст</string>
+<string name="toast_undo_disabled">Отмена отключена в настройках</string>
+<string name="toast_nothing_to_undo">Нечего отменять</string>
+<string name="toast_nothing_to_redo">Нечего повторять</string>
+<string name="hint_password">Пароль</string>
+<string name="dialog_Coding_title">Закодировать</string>
+<string name="Coding_button">Закодировать</string>
+<string name="toast_password_required">Требуется пароль</string>
+<string name="dialog_Uncoding_title">Раскодировать</string>
+<string name="Uncoding_button">Раскодировать</string>
+<string name="toast_nothing_to_Coding">Нечего кодировать</string>
+<string name="toast_Codingion_failed">Ошибка кодировки: %1$s</string>
+<string name="toast_Uncodingion_failed">Ошибка раскодировки: %1$s</string>
+<string name="dialog_settings_title">Настройки</string>
+<string name="dialog_settings_message">Доступные настройки:\n• Запрет скриншотов: %1$b\n• Отмена включена: %2$b\n• Тёмная тема: %3$b\n• Размер шрифта: %4$s\n• Форматирование: %5$b\n• Номера строк (игнорируются): %6$b\n• Ретро-режим: %7$b\n• Подсветка синтаксиса: %8$b\n\nОткройте SettingsActivity для изменения.</string>
+<string name="ok_button">ОК</string>
+<string name="toast_unable_open_file_picker">Не удалось открыть выбор файла для карты синтаксиса</string>
+<string name="toast_failed_read_mapping_file">Не удалось прочитать файл карты синтаксиса: %1$s</string>
+<string name="toast_failed_read_mapping_asset">Не удалось прочитать актив карты синтаксиса: %1$s</string>
+
+    <string name="section_developers_title">👨‍💻 Разработчики</string>
+    <string name="section_developers_text">Syndes Project, сентябрь 2025. Проект с открытым исходным кодом, созданный волонтёрами и доступный сообществу.</string>
+
+    <string name="section_license_title">📜 Лицензия</string>
+    <string name="section_license_text">Это некоммерческое приложение распространяется под лицензией Apache 2.0.&#10;Разрешено использование, модификация и создание форков. Пожалуйста, сохраняйте указание на оригинальный проект: «Основано на редакторе Rust от Syndes Project» хотя бы в разделе «О программе».&#10;Полный текст лицензии см. в файле LICENSE.</string>
 </resources>
