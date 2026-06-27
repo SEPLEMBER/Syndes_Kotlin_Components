@@ -99,7 +99,7 @@ object Secure {
         val ciphertext = Base64.decode(parts[3], Base64.NO_WRAP)
 
         if (salt.size != SALT_LENGTH_BYTES || iv.size != IV_LENGTH_BYTES) {
-            throw IllegalArgumentException("Invalid salt or IV length")
+            throw IllegalArgumentException("Invalid length")
         }
 
         var key: ByteArray? = null
