@@ -127,12 +127,12 @@
 <string name="toast_nothing_to_undo">Нечего отменять</string>
 <string name="toast_nothing_to_redo">Нечего повторять</string>
 <string name="hint_password">Пароль</string>
-<string name="dialog_Coding_title">Закодировать</string>
-<string name="Coding_button">Закодировать</string>
+<string name="dialog_Coding_title">Кодировка UTF-8</string>
+<string name="Coding_button">Кодировка UTF-8</string>
 <string name="toast_password_required">Требуется пароль</string>
-<string name="dialog_Uncoding_title">Раскодировать</string>
-<string name="Uncoding_button">Раскодировать</string>
-<string name="toast_nothing_to_Coding">Нечего кодировать</string>
+<string name="dialog_Uncoding_title">Другая кодировка</string>
+<string name="Uncoding_button">Другая кодировка</string>
+<string name="toast_nothing_to_Coding">Нечего Кодировка UTF-8</string>
 <string name="toast_Codingion_failed">Ошибка кодировки: %1$s</string>
 <string name="toast_Uncodingion_failed">Ошибка раскодировки: %1$s</string>
 <string name="dialog_settings_title">Настройки</string>
