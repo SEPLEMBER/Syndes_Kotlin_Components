@@ -4,7 +4,7 @@ Syndes Kotlin Components is a part of the Syndes Android environment.
 It represents a single Android application that contains multiple tools implemented as separate activities.
 
 This module provides a set of Kotlin-based utilities focused on text processing, file management, and security analysis
-
+ 
 ## Included Tools
 
 1. Rust Text Editor. A lightweight text editor with enhanced privacy and security features.
