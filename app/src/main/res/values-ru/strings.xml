@@ -12,8 +12,8 @@
     <string name="menu_find">Найти</string>
     <string name="menu_undo">Отменить</string>
     <string name="menu_redo">Повторить</string>
-    <string name="menu_encrypt">Encrypt</string>
-    <string name="menu_decrypt">Decrypt</string>
+    <string name="menu_Coding">Coding</string>
+    <string name="menu_Uncoding">Uncoding</string>
     <string name="menu_settings">Настройки</string>
 
     <string name="settings_title">Настройки</string>
@@ -84,7 +84,7 @@
 
     <string name="section_tutorial_item4">4. После изменения настроек подсветки синтаксиса рекомендуется перезапустить приложение.</string>
 
-    <string name="section_tutorial_item5">5. Защита данных реализована на основе алгоритма AES в режиме GCM с HMAC-SHA256 и PBKDF2 (75 000 итераций). Использование случайного и достаточно сложного пароля обеспечивает высокий уровень защиты. Важно: слабый пароль сводит на нет все криптографические меры, поэтому для корпоративных или конфиденциальных данных используйте надёжные пароли, желательно сгенерированные и сохранённые в менеджере паролей.</string>
+    <string name="section_tutorial_item5">5. Кодировка UTF-8.</string>
 
     <string name="section_tutorial_item6">6. Этот редактор является частью экосистемы Syndes. Использование для рабочих задач разрешено и не ограничено лицензией. Проект бесплатный и распространяется с открытым исходным кодом.</string>
 
@@ -92,14 +92,14 @@
 
     <!-- Диалоги / тосты -->
     <string name="dialog_find_replace_title">Найти / Заменить</string>
-    <string name="dialog_encrypting_title">Шифрование</string>
-    <string name="dialog_encrypting_message">Пожалуйста, подождите</string>
-    <string name="toast_encrypt_done">Шифрование завершено</string>
+    <string name="dialog_Codinging_title">кодировка</string>
+    <string name="dialog_Codinging_message">Пожалуйста, подождите</string>
+    <string name="toast_Coding_done">кодировка завершено</string>
 
-    <string name="dialog_decrypting_title">Расшифровка</string>
-    <string name="dialog_decrypting_message">Пожалуйста, подождите</string>
-    <string name="toast_decrypt_done">Расшифровка завершена</string>
-    <string name="toast_nothing_to_decrypt">Нечего расшифровывать</string>
+    <string name="dialog_Uncodinging_title">Раскодировка</string>
+    <string name="dialog_Uncodinging_message">Пожалуйста, подождите</string>
+    <string name="toast_Uncoding_done">Раскодировка завершена</string>
+    <string name="toast_nothing_to_Uncoding">Нечего раскодировывать</string>
 
     <string name="toast_amber_on">Режим янтаря включён</string>
     <string name="toast_amber_off">Режим янтаря выключен</string>
@@ -127,14 +127,14 @@
 <string name="toast_nothing_to_undo">Нечего отменять</string>
 <string name="toast_nothing_to_redo">Нечего повторять</string>
 <string name="hint_password">Пароль</string>
-<string name="dialog_encrypt_title">Зашифровать</string>
-<string name="encrypt_button">Зашифровать</string>
+<string name="dialog_Coding_title">Закодировать</string>
+<string name="Coding_button">Закодировать</string>
 <string name="toast_password_required">Требуется пароль</string>
-<string name="dialog_decrypt_title">Расшифровать</string>
-<string name="decrypt_button">Расшифровать</string>
-<string name="toast_nothing_to_encrypt">Нечего шифровать</string>
-<string name="toast_encryption_failed">Ошибка шифрования: %1$s</string>
-<string name="toast_decryption_failed">Ошибка расшифровки: %1$s</string>
+<string name="dialog_Uncoding_title">Раскодировать</string>
+<string name="Uncoding_button">Раскодировать</string>
+<string name="toast_nothing_to_Coding">Нечего кодировать</string>
+<string name="toast_Codingion_failed">Ошибка кодировки: %1$s</string>
+<string name="toast_Uncodingion_failed">Ошибка раскодировки: %1$s</string>
 <string name="dialog_settings_title">Настройки</string>
 <string name="dialog_settings_message">Доступные настройки:\n• Запрет скриншотов: %1$b\n• Отмена включена: %2$b\n• Тёмная тема: %3$b\n• Размер шрифта: %4$s\n• Форматирование: %5$b\n• Номера строк (игнорируются): %6$b\n• Ретро-режим: %7$b\n• Подсветка синтаксиса: %8$b\n\nОткройте SettingsActivity для изменения.</string>
 <string name="ok_button">ОК</string>
