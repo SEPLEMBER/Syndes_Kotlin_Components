@@ -59,7 +59,7 @@ object Secure {
 
             val cipher = Cipher.getInstance(CIPHER_ALGORITHM)
             val spec = GCMParameterSpec(TAG_LENGTH_BITS, iv)
-            cipher.init(Cipher.Coding_MODE, secretKey, spec)
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey, spec)
 
             // AAD: format version, salt, iv (as in original)
             cipher.updateAAD(FORMAT_VERSION.toByteArray(StandardCharsets.UTF_8))
@@ -109,7 +109,7 @@ object Secure {
 
             val cipher = Cipher.getInstance(CIPHER_ALGORITHM)
             val spec = GCMParameterSpec(TAG_LENGTH_BITS, iv)
-            cipher.init(Cipher.Uncoding_MODE, secretKey, spec)
+            cipher.init(Cipher.DECRYPT_MODE, secretKey, spec)
 
             cipher.updateAAD(FORMAT_VERSION.toByteArray(StandardCharsets.UTF_8))
             cipher.updateAAD(salt)
