@@ -20,6 +20,7 @@ import java.io.BufferedInputStream
 import java.io.InputStream
 import java.nio.charset.Charset
 import kotlin.text.RegexOption
+import android.view.WindowManager
 
 class ReplaceToolActivity : AppCompatActivity() {
 
@@ -46,6 +47,12 @@ class ReplaceToolActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        window.setFlags(
+            WindowManager.LayoutParams.FLAG_SECURE,
+            WindowManager.LayoutParams.FLAG_SECURE
+        )
+        
         setContentView(R.layout.activity_replace_tool)
 
         etFind = findViewById(R.id.etFind)
