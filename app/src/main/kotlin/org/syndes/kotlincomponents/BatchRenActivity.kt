@@ -16,6 +16,7 @@ import kotlinx.coroutines.*
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.util.*
+import android.view.WindowManager
 
 class BatchRenActivity : AppCompatActivity() {
 
@@ -110,6 +111,12 @@ class BatchRenActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        window.setFlags(
+            WindowManager.LayoutParams.FLAG_SECURE,
+            WindowManager.LayoutParams.FLAG_SECURE
+        )
+        
         setContentView(R.layout.activity_batch_ren)
 
         selectFolderBtn = findViewById(R.id.btn_select_folder)
