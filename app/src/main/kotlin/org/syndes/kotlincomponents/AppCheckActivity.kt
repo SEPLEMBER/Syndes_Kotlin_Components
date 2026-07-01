@@ -25,6 +25,7 @@ import java.security.cert.X509Certificate
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.LinkedHashMap
+import android.view.WindowManager
 
 /**
  * AppCheckActivity — упрощённая версия:
@@ -73,6 +74,12 @@ class AppCheckActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        window.setFlags(
+            WindowManager.LayoutParams.FLAG_SECURE,
+            WindowManager.LayoutParams.FLAG_SECURE
+        )
+        
         supportActionBar?.hide()
         setContentView(R.layout.activity_app_check)
 
