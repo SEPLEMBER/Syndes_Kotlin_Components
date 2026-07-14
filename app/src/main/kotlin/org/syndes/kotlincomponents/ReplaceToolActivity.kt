@@ -74,11 +74,11 @@ class ReplaceToolActivity : AppCompatActivity() {
             val replace = etReplace.text.toString()
             val params = etParams.text.toString()
             if (find.isEmpty()) {
-                Toast.makeText(this, "Find cannot be empty", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Поле поиска не может быть пустым", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
             if (pickedRoot == null) {
-                Toast.makeText(this, "Please choose a folder with Choose Folder (SAF)", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Пожалуйста, выберите папку с помощью кнопки 'Выбрать папку' (SAF)", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -94,7 +94,7 @@ class ReplaceToolActivity : AppCompatActivity() {
 
             // start processing (scan or apply depending on preview/dry-run)
             showOverlay()
-            tvStatus.text = "Scanning..."
+            tvStatus.text = "Сканирование..."
             lifecycleScope.launchWhenStarted {
                 val scanResult = withContext(Dispatchers.IO) {
                     processReplace(
@@ -115,20 +115,14 @@ class ReplaceToolActivity : AppCompatActivity() {
                 } else {
                     // dry-run or immediate apply
                     if (dryRun) {
-                        tvStatus.text = "Dry-run. Files that would change: ${scanResult.filesModified}, Replacements: ${scanResult.totalReplacements}"
-                        Toast.makeText(
-                            this@ReplaceToolActivity,
-                            "Dry-run. Files that would change: ${scanResult.filesModified}, Replacements: ${scanResult.totalReplacements}",
-                            Toast.LENGTH_LONG
-                        ).show()
+                        val msg = "Пробный запуск (dry-run). Файлов будет изменено: ${scanResult.filesModified}, Замен: ${scanResult.totalReplacements}"
+                        tvStatus.text = msg
+                        Toast.makeText(this@ReplaceToolActivity, msg, Toast.LENGTH_LONG).show()
                     } else {
                         // apply directly (scanResult here is the actual apply result if collectPreview=false and dryRun=false)
-                        tvStatus.text = "Done. Files changed: ${scanResult.filesModified}, Replacements: ${scanResult.totalReplacements}"
-                        Toast.makeText(
-                            this@ReplaceToolActivity,
-                            "Done. Files changed: ${scanResult.filesModified}, Replacements: ${scanResult.totalReplacements}",
-                            Toast.LENGTH_LONG
-                        ).show()
+                        val msg = "Готово. Файлов изменено: ${scanResult.filesModified}, Замен: ${scanResult.totalReplacements}"
+                        tvStatus.text = msg
+                        Toast.makeText(this@ReplaceToolActivity, msg, Toast.LENGTH_LONG).show()
                     }
                 }
             }
@@ -140,10 +134,9 @@ class ReplaceToolActivity : AppCompatActivity() {
         if (requestCode == REQUEST_TREE && resultCode == Activity.RESULT_OK) {
             data?.data?.let { uri ->
                 // do NOT take persistable permission -> one-time selection behavior
-                // contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                 pickedTreeUri = uri
                 pickedRoot = DocumentFile.fromTreeUri(this, uri)
-                tvStatus.text = "Picked: ${pickedRoot?.name ?: uri.path}"
+                tvStatus.text = "Выбрано: ${pickedRoot?.name ?: uri.path}"
             }
         }
     }
@@ -201,10 +194,17 @@ class ReplaceToolActivity : AppCompatActivity() {
         fun isProbablyTextByExt(name: String?): Boolean {
             if (name == null) return false
             val lower = name.lowercase()
+            // Added: .toml, .kts, .kt, .lua, .ft, .fst, .go, .java, .py
             val textExt = listOf(
                 ".txt", ".md", ".json", ".xml", ".html", ".htm", ".csv",
-                ".properties", ".yml", ".yaml", ".gradle", ".java", ".kt",
-                ".kts", ".cpp", ".c", ".h", ".py", ".sh", ".js", ".css", ".php"
+                ".properties", ".yml", ".yaml", ".gradle", 
+                ".java", ".kt", ".kts",          // Kotlin & Java
+                ".py",                           // Python
+                ".go",                           // Golang
+                ".lua",                          // Lua
+                ".toml",                         // TOML (libs toml)
+                ".ft", ".fst",                   // Custom text-like / F#
+                ".cpp", ".c", ".h", ".sh", ".js", ".css", ".php"
             )
             return textExt.any { lower.endsWith(it) }
         }
@@ -266,7 +266,6 @@ class ReplaceToolActivity : AppCompatActivity() {
                 } else {
                     // dryRun or collectPreview -> only count
                     totalReplacements += foundCount
-                    // filesModified remains 0 in dryRun/collectPreview phase; for preview we only show candidates
                 }
             } catch (e: Exception) {
                 Log.w("ReplaceTool", "skip file ${doc.uri}", e)
@@ -306,7 +305,7 @@ class ReplaceToolActivity : AppCompatActivity() {
         return if (n == -1) ByteArray(0) else buffer.copyOf(n)
     }
 
-    // overlay UI: black background, centered rotating amber text "REPLACING", bottom "working..."
+    // overlay UI: black background, centered rotating amber text "ЗАМЕНА", bottom "выполняется..."
     private fun showOverlay() {
         runOnUiThread {
             if (overlay != null) return@runOnUiThread
@@ -325,7 +324,7 @@ class ReplaceToolActivity : AppCompatActivity() {
             }
 
             val working = TextView(this).apply {
-                text = "working..."
+                text = "выполняется..."
                 textSize = 14f
                 setTextColor(0xFFFFBF00.toInt())
                 val lp = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT)
@@ -376,7 +375,7 @@ class ReplaceToolActivity : AppCompatActivity() {
             val previews = scanResult.previews
             val totalShown = previews.sumOf { it.matches.size }
             val builder = AlertDialog.Builder(this)
-            builder.setTitle("Preview: ${previews.size} files, $totalShown matches (showing samples)")
+            builder.setTitle("Предпросмотр: ${previews.size} файлов, $totalShown совпадений (показаны примеры)")
 
             val scroll = ScrollView(this)
             val container = LinearLayout(this).apply {
@@ -387,7 +386,7 @@ class ReplaceToolActivity : AppCompatActivity() {
 
             if (previews.isEmpty()) {
                 val empty = TextView(this).apply {
-                    text = "No matches found."
+                    text = "Совпадений не найдено."
                     setTextColor(0xFFFFBF00.toInt())
                 }
                 container.addView(empty)
@@ -404,7 +403,7 @@ class ReplaceToolActivity : AppCompatActivity() {
                         val tv = TextView(this).apply {
                             val beforeEsc = m.lineText.replace("\t", "    ")
                             val afterEsc = m.replacedLine.replace("\t", "    ")
-                            text = if (showLineNumbers) "line ${m.lineNumber}: $beforeEsc\n→ $afterEsc" else "$beforeEsc\n→ $afterEsc"
+                            text = if (showLineNumbers) "строка ${m.lineNumber}: $beforeEsc\n→ $afterEsc" else "$beforeEsc\n→ $afterEsc"
                             setTextColor(0xFFFFBF00.toInt())
                             textSize = 12f
                             setPadding(0, 6, 0, 10)
@@ -423,12 +422,12 @@ class ReplaceToolActivity : AppCompatActivity() {
             scroll.addView(container)
             builder.setView(scroll)
 
-            builder.setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
-            builder.setPositiveButton("Apply") { dialog, _ ->
+            builder.setNegativeButton("Отмена") { dialog, _ -> dialog.dismiss() }
+            builder.setPositiveButton("Применить") { dialog, _ ->
                 dialog.dismiss()
                 // Perform actual write operation (no dry-run, no collectPreview)
                 showOverlay()
-                tvStatus.text = "Applying..."
+                tvStatus.text = "Применение..."
                 lifecycleScope.launchWhenStarted {
                     val applyResult = withContext(Dispatchers.IO) {
                         processReplace(
@@ -439,12 +438,9 @@ class ReplaceToolActivity : AppCompatActivity() {
                         )
                     }
                     hideOverlay()
-                    tvStatus.text = "Applied. Files changed: ${applyResult.filesModified}, Replacements: ${applyResult.totalReplacements}"
-                    Toast.makeText(
-                        this@ReplaceToolActivity,
-                        "Applied. Files changed: ${applyResult.filesModified}, Replacements: ${applyResult.totalReplacements}",
-                        Toast.LENGTH_LONG
-                    ).show()
+                    val msg = "Применено. Файлов изменено: ${applyResult.filesModified}, Замен: ${applyResult.totalReplacements}"
+                    tvStatus.text = msg
+                    Toast.makeText(this@ReplaceToolActivity, msg, Toast.LENGTH_LONG).show()
                 }
             }
 
