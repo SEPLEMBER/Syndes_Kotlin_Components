@@ -12,7 +12,7 @@
 
         <TextView
             android:id="@+id/titleLabel"
-            android:text="Grep and Replace"
+            android:text="Поиск и замена"
             android:textSize="20sp"
             android:textStyle="bold"
             android:layout_marginBottom="12dp"
@@ -22,7 +22,7 @@
 
         <EditText
             android:id="@+id/etFind"
-            android:hint="Find"
+            android:hint="Найти"
             android:inputType="textMultiLine"
             android:minLines="1"
             android:layout_marginBottom="8dp"
@@ -35,7 +35,7 @@
 
         <EditText
             android:id="@+id/etReplace"
-            android:hint="Replace"
+            android:hint="Заменить на"
             android:inputType="textMultiLine"
             android:minLines="1"
             android:layout_marginBottom="8dp"
@@ -49,7 +49,7 @@
 
         <EditText
             android:id="@+id/etParams"
-            android:hint="Parameters (e.g. -r -i -e -w -n --dry-run)"
+            android:hint="Параметры (например, -r -i -e -w -n --dry-run)"
             android:inputType="text"
             android:layout_marginBottom="8dp"
             android:backgroundTint="#FFBF00"
@@ -61,7 +61,7 @@
 
         <CheckBox
             android:id="@+id/cbPreviewOnly"
-            android:text="Preview only (show matches before applying)"
+            android:text="Только предпросмотр (показать совпадения перед применением)"
             android:layout_marginBottom="8dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -70,7 +70,7 @@
 
         <TextView
             android:id="@+id/instruction"
-            android:text="Parameters:\n -r : recursive\n -i : ignore case\n -e : treat find as regex\n -w : whole-word match\n -n : show line numbers in preview\n --dry-run : simulate only (no writes)\nUse Preview only to inspect changes before applying."
+            android:text="Параметры:\n -r : рекурсивно\n -i : игнорировать регистр\n -e : искать как регулярное выражение (regex)\n -w : поиск целых слов\n -n : показывать номера строк в предпросмотре\n --dry-run : пробный запуск (без записи)\nИспользуйте 'Только предпросмотр', чтобы проверить изменения перед применением."
             android:layout_marginBottom="12dp"
             android:textColor="#FFBF00"
             android:textSize="12sp"
@@ -79,7 +79,7 @@
 
         <Button
             android:id="@+id/btnChoose"
-            android:text="Choose Folder (SAF)"
+            android:text="Выбрать папку (SAF)"
             android:layout_marginBottom="12dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -88,7 +88,7 @@
 
         <Button
             android:id="@+id/btnReplace"
-            android:text="Replace"
+            android:text="Заменить"
             android:layout_marginBottom="12dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
