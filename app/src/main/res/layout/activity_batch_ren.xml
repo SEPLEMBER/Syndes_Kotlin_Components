@@ -14,7 +14,7 @@
             android:id="@+id/tv_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Batch Rename"
+            android:text="Массовое переименование"
             android:textColor="#39FF14"
             android:textSize="20sp"
             android:paddingBottom="10dp"
@@ -24,7 +24,7 @@
             android:id="@+id/btn_select_folder"
             android:layout_width="match_parent"
             android:layout_height="48dp"
-            android:text="Select folder (SAF)"
+            android:text="Выбрать папку (SAF)"
             android:textColor="#000000"
             android:background="#39FF14"
             android:textAllCaps="false" />
@@ -33,7 +33,7 @@
             android:id="@+id/tv_folder_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Folder: (none)"
+            android:text="Папка: (не выбрана)"
             android:textColor="#39FF14"
             android:paddingTop="8dp"
             android:typeface="monospace" />
@@ -41,7 +41,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="1) What to search for (e.g. .txt)"
+            android:text="1) Что искать (например, .txt)"
             android:textColor="#39FF14"
             android:paddingTop="14dp"
             android:typeface="monospace" />
@@ -60,7 +60,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="2) Rename rule (e.g. IMG_\\$numb.jpg or .py)"
+            android:text="2) Правило переименования (например, IMG_\\$numb.jpg или .py)"
             android:textColor="#39FF14"
             android:paddingTop="12dp"
             android:typeface="monospace" />
@@ -71,7 +71,7 @@
             android:layout_height="48dp"
             android:background="#0b0b0b"
             android:textColor="#39FF14"
-            android:hint="IMG_\\$numb.jpg or .py"
+            android:hint="IMG_\\$numb.jpg или .py"
             android:textColorHint="#2efc63"
             android:padding="10dp"
             android:typeface="monospace" />
@@ -79,7 +79,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="3) Flags: -I (ignore case), -r (recursive)"
+            android:text="3) Флаги: -i (игнорировать регистр), -r (рекурсивно)"
             android:textColor="#39FF14"
             android:paddingTop="12dp"
             android:typeface="monospace" />
@@ -90,7 +90,7 @@
             android:layout_height="40dp"
             android:background="#0b0b0b"
             android:textColor="#39FF14"
-            android:hint="-I -r"
+            android:hint="-i -r"
             android:textColorHint="#2efc63"
             android:padding="10dp"
             android:typeface="monospace" />
@@ -99,7 +99,7 @@
             android:id="@+id/tv_instruction"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Instruction area"
+            android:text="Область инструкций"
             android:textColor="#39FF14"
             android:paddingTop="14dp"
             android:typeface="monospace" />
@@ -108,7 +108,7 @@
             android:id="@+id/btn_rename"
             android:layout_width="match_parent"
             android:layout_height="52dp"
-            android:text="Rename"
+            android:text="Переименовать"
             android:textColor="#000000"
             android:background="#39FF14"
             android:textAllCaps="false"
@@ -118,7 +118,7 @@
             android:id="@+id/tv_status"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Status: idle"
+            android:text="Статус: ожидание"
             android:textColor="#39FF14"
             android:paddingTop="10dp"
             android:typeface="monospace" />
