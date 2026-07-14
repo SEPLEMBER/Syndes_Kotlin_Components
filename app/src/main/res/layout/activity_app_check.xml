@@ -33,7 +33,7 @@
                 android:layout_weight="1"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:hint="com.google, com.samsung  (comma-separated)"
+                android:hint="com.google, com.samsung  (через запятую)"
                 android:textColor="#AAFFFFFF"
                 android:textColorHint="#444444"
                 android:backgroundTint="#00FFEA"
@@ -45,7 +45,7 @@
                 android:id="@+id/btn_scan"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Scan"
+                android:text="Сканировать"
                 android:layout_marginStart="8dp" />
         </LinearLayout>
 
@@ -60,7 +60,7 @@
                 android:id="@+id/switch_only_system"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Only system"
+                android:text="Только системные"
                 android:checked="true"
                 android:textColor="#AAFFFFFF"
                 android:fontFamily="monospace" />
@@ -69,7 +69,7 @@
                 android:id="@+id/switch_exclude_prefixes"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Exclude prefixes"
+                android:text="Исключать префиксы"
                 android:checked="true"
                 android:layout_marginStart="18dp"
                 android:textColor="#AAFFFFFF"
@@ -88,21 +88,21 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text="Analyze Permissions" />
+                android:text="Анализ разрешений" />
 
             <Button
                 android:id="@+id/btn_signatures"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text="Analyze Signatures"
+                android:text="Анализ подписей"
                 android:layout_marginStart="8dp" />
 
             <Button
                 android:id="@+id/btn_export"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Export"
+                android:text="Экспорт"
                 android:layout_marginStart="8dp"/>
         </LinearLayout>
 
@@ -115,7 +115,7 @@
             android:fontFamily="monospace"
             android:textSize="12sp"
             android:paddingBottom="6dp"
-            android:text="Ready" />
+            android:text="Готово" />
 
         <!-- Список результатов -->
         <ListView
