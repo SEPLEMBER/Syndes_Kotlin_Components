@@ -40,15 +40,22 @@ class BatchRenActivity : AppCompatActivity() {
 
     // --- explicit MIME map: add known mappings here ---
     private val explicitMimeMap: Map<String, String> = mapOf(
-        // Kotlin
+        // Kotlin & Java
         "kt" to "text/x-kotlin",
         "kts" to "text/x-kotlin",
-
-        // Python
-        "py" to "text/x-python",
-
-        // Java / C-family / C-like
         "java" to "text/x-java-source",
+
+        // Python & Golang & Lua
+        "py" to "text/x-python",
+        "go" to "text/x-go",
+        "lua" to "text/x-lua",
+
+        // TOML & Custom text-like
+        "toml" to "text/x-toml",
+        "ft" to "text/plain",
+        "fst" to "text/plain",
+
+        // C-family / C-like
         "c" to "text/x-csrc",
         "cpp" to "text/x-c++src",
         "cc" to "text/x-c++src",
@@ -57,14 +64,12 @@ class BatchRenActivity : AppCompatActivity() {
         "hpp" to "text/x-c++hdr",
         "hh" to "text/x-c++hdr",
 
-        // C#, Go, Rust, Swift, Scala, etc.
+        // C#, Rust, Swift, Scala, etc.
         "cs" to "text/x-csharp",
-        "go" to "text/x-go",
         "rs" to "text/rust",
         "swift" to "text/x-swift",
         "scala" to "text/x-scala",
         "groovy" to "text/x-groovy",
-        "lua" to "text/x-lua",
 
         // JS / TS / web
         "js" to "application/javascript",
@@ -80,7 +85,7 @@ class BatchRenActivity : AppCompatActivity() {
         "sh" to "application/x-sh",
         "bash" to "application/x-sh",
         "zsh" to "application/x-sh",
-        "ps1" to "text/plain", // powershell scripts as plain text for compatibility
+        "ps1" to "text/plain",
         "bat" to "text/plain",
         "cmd" to "text/plain",
         "pl" to "text/x-perl",
@@ -97,15 +102,14 @@ class BatchRenActivity : AppCompatActivity() {
         "properties" to "text/plain",
         "log" to "text/plain",
 
-        // Your custom extension: treat as plain text (you said it's txt-like)
+        // Your custom extension: treat as plain text
         "syd" to "text/plain"
     )
 
     // Extensions we explicitly want to consider "text/plain" if MimeTypeMap doesn't know them.
-    // This prevents using origMime (which might be text/plain from the source), and reduces the
-    // chance of the provider appending an old extension like ".txt".
     private val textLikeExtensions: Set<String> = setOf(
-        "txt", "md", "log", "ini", "properties", "ps1", "bat", "cmd", "syd"
+        "txt", "md", "log", "ini", "properties", "ps1", "bat", "cmd", "syd",
+        "toml", "lua", "ft", "fst", "go" // Added new extensions for consistency
     )
     // --- end of MIME-related fields ---
 
@@ -134,25 +138,22 @@ class BatchRenActivity : AppCompatActivity() {
     }
 
     private fun buildInstructionText(): String {
-        // Note: includes an English memo about unstable plaintext-like extensions (no XML edits required)
-        return "Instructions:\n" +
-                "- Field 1: what to search for (usually an extension, e.g. .txt). Leave empty — all files.\n" +
-                "- Field 2: rename rule. Examples:\n" +
-                "    • .py — replace extension with .py\n" +
-                "    • IMG_${'$'}numb.jpg — sequence IMG_1.jpg, IMG_2.jpg …\n" +
-                "    • rev:IMG_${'$'}numb.jpg — same, but in reverse date order.\n" +
-                "- Flags: -I/-i (ignore case), -r (recursive). Can be combined: -ir, -ri or separated by spaces.\n" +
-                "- Select folder (SAF). Permissions are not persisted (by design).\n" +
-                "- Press Rename — the process runs in coroutines; Status below the button shows 'working' with animation.\n\n" +
-                // English memo requested by user
-                "Note (English): Some target extensions may behave inconsistently across devices/providers. " +
-                "For example, when renaming to an extension that the system's MIME database doesn't know, " +
-                "the SAF provider may append the original file's extension (e.g. \".txt\") to the new name. " +
-                "To mitigate this, the app uses a curated MIME map and falls back to 'application/octet-stream' " +
-                "for unknown extensions. However there are no guarantees — behaviour depends on the device and storage provider.\n\n" +
-                "Extensions currently treated as plaintext by this app (may be unstable across devices):\n" +
-                "  .syd, .bat, .cmd, .ps1, .txt, .md, .ini, .log, .properties\n\n" +
-                "If you rely on a specific extension working without an extra \".txt\", consider adding it to the app's explicit map."
+        return "Инструкции:\n" +
+                "- Поле 1: что искать (обычно расширение, например, .txt). Оставьте пустым — для всех файлов.\n" +
+                "- Поле 2: правило переименования. Примеры:\n" +
+                "    • .py — заменить расширение на .py\n" +
+                "    • IMG_${'$'}numb.jpg — последовательность IMG_1.jpg, IMG_2.jpg …\n" +
+                "    • rev:IMG_${'$'}numb.jpg — то же самое, но в обратном порядке по дате.\n" +
+                "- Флаги: -i (игнорировать регистр), -r (рекурсивно). Можно комбинировать: -ir, -ri или через пробел.\n" +
+                "- Выберите папку (SAF). Разрешения не сохраняются (по замыслу).\n" +
+                "- Нажмите 'Переименовать' — процесс выполняется в корутинах; Статус под кнопкой показывает 'выполняется' с анимацией.\n\n" +
+                "Примечание: Некоторые целевые расширения могут вести себя нестабильно на разных устройствах/провайдерах. " +
+                "Например, при переименовании в расширение, которое не знает база данных MIME системы, провайдер SAF может добавить исходное расширение файла (например, \".txt\") к новому имени. " +
+                "Для смягчения этого приложение использует специальную карту MIME и возвращается к 'application/octet-stream' для неизвестных расширений. " +
+                "Однако гарантий нет — поведение зависит от устройства и провайдера хранилища.\n\n" +
+                "Расширения, которые в настоящее время обрабатываются как текстовые этим приложением (могут быть нестабильны на разных устройствах):\n" +
+                "  .syd, .bat, .cmd, .ps1, .txt, .md, .ini, .log, .properties, .toml, .lua, .ft, .fst, .go\n\n" +
+                "Если вы полагаетесь на то, что конкретное расширение будет работать без добавления \".txt\", рассмотрите возможность добавления его в явную карту приложения."
     }
 
     private fun openFolderPicker() {
@@ -169,14 +170,14 @@ class BatchRenActivity : AppCompatActivity() {
             // intentionally NOT taking persistable permission per spec
             treeUri = uri
             treeDoc = DocumentFile.fromTreeUri(this, uri)
-            folderNameTv.text = "Folder: ${treeDoc?.name ?: uri.path}"
+            folderNameTv.text = "Папка: ${treeDoc?.name ?: uri.path}"
         }
     }
 
     private fun startRenameProcess() {
         val tree = treeDoc
         if (tree == null) {
-            statusTv.text = "Status: select a folder first"
+            statusTv.text = "Статус: сначала выберите папку"
             return
         }
 
@@ -197,18 +198,18 @@ class BatchRenActivity : AppCompatActivity() {
         }
 
         dotsJob?.cancel()
-        statusTv.text = "Status: working"
+        statusTv.text = "Статус: выполняется"
         dotsJob = startDotsAnimation()
 
         lifecycleScope.launch {
             val result = withContext(Dispatchers.IO) {
                 try {
                     processRename(tree, sourcePatternRaw, renamePatternRaw, ignoreCase, recursive, reverseOrder)
-                    "Status: done"
+                    "Статус: готово"
                 } catch (e: CancellationException) {
-                    "Status: cancelled"
+                    "Статус: отменено"
                 } catch (t: Throwable) {
-                    "Status: error: ${t.message}"
+                    "Статус: ошибка: ${t.message}"
                 }
             }
             dotsJob?.cancel()
@@ -218,7 +219,7 @@ class BatchRenActivity : AppCompatActivity() {
 
     private fun startDotsAnimation(): Job {
         return lifecycleScope.launch {
-            val base = "Status: working"
+            val base = "Статус: выполняется"
             var dots = 0
             while (isActive) {
                 val dotsStr = ".".repeat(dots % 4)
@@ -303,12 +304,6 @@ class BatchRenActivity : AppCompatActivity() {
 
     /**
      * Remove exactly the sourcePattern suffix from originalName if it matches (respecting ignoreCase).
-     * If sourcePattern is empty or doesn't match, fallback to removing the last extension (last dot).
-     *
-     * Examples:
-     *  - removeSourceSuffixExactly("script.txt", ".txt", false) -> "script"
-     *  - removeSourceSuffixExactly("a.b.txt", ".txt", false) -> "a.b"
-     *  - removeSourceSuffixExactly("file", ".txt", false) -> "file" (no change)
      */
     private fun removeSourceSuffixExactly(originalName: String, sourcePattern: String, ignoreCase: Boolean): String {
         if (sourcePattern.isNotEmpty() && originalName.length > sourcePattern.length) {
@@ -363,12 +358,6 @@ class BatchRenActivity : AppCompatActivity() {
 
     /**
      * Compute MIME type to use when creating the new file.
-     * Priority:
-     * 1) If desiredName has extension and we know a MIME for it (explicit map) -> use it
-     * 2) Else ask MimeTypeMap.getMimeTypeFromExtension
-     * 3) If desiredName has extension but no known MIME -> if ext in textLikeExtensions -> text/plain
-     *    else -> application/octet-stream
-     * 4) If desiredName has NO extension -> fallback to origMime or application/octet-stream
      */
     private fun computeMimeForName(desiredName: String, origMime: String?): String {
         val ext = getExtension(desiredName)
@@ -399,8 +388,8 @@ class BatchRenActivity : AppCompatActivity() {
     }
 
     /**
-     * Copy file bytes (in RAM), create new file with MIME derived from desired name (important),
-     * then delete source only after successful write. On write failure the created partial file is removed.
+     * Copy file bytes (in RAM), create new file with MIME derived from desired name,
+     * then delete source only after successful write.
      */
     private fun safeCopyAndReplace(source: DocumentFile, parent: DocumentFile, desiredName: String) {
         val origUri = source.uri
@@ -436,8 +425,7 @@ class BatchRenActivity : AppCompatActivity() {
             try {
                 source.delete()
             } catch (t: Throwable) {
-                // If deletion failed, leave created file and report via status text (we don't throw here).
-                // Could log this for debugging if desired.
+                // If deletion failed, leave created file and report via status text.
             }
         }
     }
