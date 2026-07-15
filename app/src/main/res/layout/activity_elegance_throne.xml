@@ -44,22 +44,22 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/encryptButton"
+            android:id="@+id/codingButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Encrypt"
+            android:text="Coding"
             android:textAllCaps="false"
             android:textColor="#B0B0B0"
             android:backgroundTint="#8A2BE2" />
 
         <Button
-            android:id="@+id/decryptButton"
+            android:id="@+id/uncodingButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginStart="8dp"
-            android:text="Decrypt"
+            android:text="Uncoding"
             android:textAllCaps="false"
             android:textColor="#B0B0B0"
             android:backgroundTint="#8A2BE2" />
