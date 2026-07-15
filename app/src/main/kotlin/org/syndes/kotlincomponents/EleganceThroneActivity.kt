@@ -10,8 +10,8 @@ class EleganceThroneActivity : AppCompatActivity() {
 
     private lateinit var passwordField: EditText
     private lateinit var textField: EditText
-    private lateinit var encryptButton: Button
-    private lateinit var decryptButton: Button
+    private lateinit var codingButton: Button
+    private lateinit var uncodingButton: Button
     private lateinit var clearButton: Button
     private lateinit var exitButton: Button
 
@@ -21,18 +21,18 @@ class EleganceThroneActivity : AppCompatActivity() {
 
         passwordField = findViewById(R.id.passwordField)
         textField = findViewById(R.id.textField)
-        encryptButton = findViewById(R.id.encryptButton)
-        decryptButton = findViewById(R.id.decryptButton)
+        codingButton = findViewById(R.id.codingButton)
+        uncodingButton = findViewById(R.id.uncodingButton)
         clearButton = findViewById(R.id.clearButton)
         exitButton = findViewById(R.id.exitButton)
 
-        encryptButton.setOnClickListener { encryptFlow() }
-        decryptButton.setOnClickListener { decryptFlow() }
+        codingButton.setOnClickListener { codingFlow() }
+        uncodingButton.setOnClickListener { uncodingFlow() }
         clearButton.setOnClickListener { clearFields() }
         exitButton.setOnClickListener { finishAffinity() }
     }
 
-    private fun encryptFlow() {
+    private fun codingFlow() {
         val password = passwordField.text?.toString().orEmpty()
         val plaintext = textField.text?.toString().orEmpty()
 
@@ -56,13 +56,13 @@ class EleganceThroneActivity : AppCompatActivity() {
                 textField.setSelection(elegant.length)
             }
         } catch (e: Exception) {
-            toast(e.message ?: "Encryption failed.")
+            toast(e.message ?: "Coding failed.")
         } finally {
             passwordChars.fill('\u0000')
         }
     }
 
-    private fun decryptFlow() {
+    private fun uncodingFlow() {
         val password = passwordField.text?.toString().orEmpty()
         val input = textField.text?.toString().orEmpty()
 
@@ -86,7 +86,7 @@ class EleganceThroneActivity : AppCompatActivity() {
                 textField.setSelection(plaintext.length)
             }
         } catch (e: Exception) {
-            toast(e.message ?: "Decryption failed.")
+            toast(e.message ?: "Uncoding failed.")
         } finally {
             passwordChars.fill('\u0000')
         }
