@@ -49,7 +49,7 @@ class EleganceThroneActivity : AppCompatActivity() {
         val passwordChars = password.toCharArray()
         try {
             val aes = Secure.Coding(passwordChars, plaintext)
-            val elegant = Secure2.Coding(aes)
+            val elegant = Secure2.Coding(aes).orEmpty()
 
             textField.setText(elegant)
             if (elegant.isNotEmpty()) {
@@ -78,8 +78,8 @@ class EleganceThroneActivity : AppCompatActivity() {
 
         val passwordChars = password.toCharArray()
         try {
-            val decoded = Secure2.Uncoding(input)
-            val plaintext = Secure.Uncoding(passwordChars, decoded)
+            val decoded = Secure2.Uncoding(input).orEmpty()
+            val plaintext = Secure.Uncoding(passwordChars, decoded).orEmpty()
 
             textField.setText(plaintext)
             if (plaintext.isNotEmpty()) {
