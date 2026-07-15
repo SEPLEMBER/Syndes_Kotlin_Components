@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="#0A0A0A">
+
+    <EditText
+        android:id="@+id/passwordField"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Password"
+        android:textColor="#B0B0B0"
+        android:textColorHint="#707070"
+        android:backgroundTint="#8A2BE2"
+        android:inputType="textPassword"
+        android:singleLine="true"
+        android:imeOptions="actionNext"
+        android:maxLines="1" />
+
+    <EditText
+        android:id="@+id/textField"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="14dp"
+        android:hint="Text"
+        android:textColor="#B0B0B0"
+        android:textColorHint="#707070"
+        android:backgroundTint="#8A2BE2"
+        android:gravity="top|start"
+        android:inputType="textMultiLine|textNoSuggestions"
+        android:scrollbars="vertical"
+        android:overScrollMode="ifContentScrolls"
+        android:minLines="8"
+        android:maxLines="999"
+        android:imeOptions="flagNoExtractUi|actionDone" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/encryptButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Encrypt"
+            android:textAllCaps="false"
+            android:textColor="#B0B0B0"
+            android:backgroundTint="#8A2BE2" />
+
+        <Button
+            android:id="@+id/decryptButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:text="Decrypt"
+            android:textAllCaps="false"
+            android:textColor="#B0B0B0"
+            android:backgroundTint="#8A2BE2" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/clearButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Clear"
+            android:textAllCaps="false"
+            android:textColor="#B0B0B0"
+            android:backgroundTint="#8A2BE2" />
+
+        <Button
+            android:id="@+id/exitButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:text="Exit"
+            android:textAllCaps="false"
+            android:textColor="#B0B0B0"
+            android:backgroundTint="#8A2BE2" />
+    </LinearLayout>
+
+</LinearLayout>
