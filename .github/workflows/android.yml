@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Android Release APK
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-release:
     runs-on: ubuntu-latest
 
     steps:
@@ -27,26 +27,13 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
-      - name: Build with Gradle
-        run: ./gradlew build --stacktrace
-
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace
-
-      - name: Upload Debug APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
-          retention-days: 7
-
+      # Собираем ТОЛЬКО Release версию. 
+      # Это автоматически создаст app-release-unsigned.apk (если не настроено автоматическое подписание)
       - name: Build Unsigned Release APK
         run: ./gradlew assembleRelease --stacktrace
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
       - name: List APK files
         run: ls -la app/build/outputs/apk/release/
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
       - name: Upload Unsigned Release APK
         uses: actions/upload-artifact@v4
@@ -54,4 +41,9 @@ jobs:
           name: unsigned-release-apk
           path: app/build/outputs/apk/release/app-release-unsigned.apk
           retention-days: 7
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+      # ⚠️ ПРИМЕЧАНИЕ: 
+      # Если вы хотите, чтобы этот релиз собирался ТОЛЬКО при пуше в main (игнорируя PR и ручной запуск),
+      # добавьте строку `if: github.event_name == 'push' && github.ref == 'refs/heads/main'` 
+      # к шагам "Build Unsigned Release APK", "List APK files" и "Upload Unsigned Release APK".
+      # Но рекомендуется оставлять как есть, чтобы проверять сборку релиза еще на этапе PR.
