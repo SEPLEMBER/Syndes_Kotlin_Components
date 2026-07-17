@@ -19,7 +19,7 @@ class RustStartActivity : AppCompatActivity() {
 
         // Лёгкая анимация (появление)
         val fadeIn = AlphaAnimation(0f, 1f)
-        fadeIn.duration = 1500
+        fadeIn.duration = 700
         fadeIn.repeatCount = Animation.INFINITE
         fadeIn.repeatMode = Animation.REVERSE
         textRust.startAnimation(fadeIn)
@@ -28,6 +28,6 @@ class RustStartActivity : AppCompatActivity() {
         Handler(Looper.getMainLooper()).postDelayed({
             startActivity(Intent(this, EditorActivity::class.java))
             finish()
-        }, 2000)
+        }, 1300)
     }
 }
