@@ -3,7 +3,9 @@
       xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <!-- File -->
-    <item android:id="@+id/menu_file" android:title="@string/menu_file">
+    <item
+        android:id="@+id/menu_file"
+        android:title="@string/menu_file">
         <menu>
             <item
                 android:id="@+id/action_open"
@@ -20,8 +22,10 @@
         </menu>
     </item>
 
-    <!-- Edit (overflow only) -->
-    <item android:id="@+id/menu_edit" android:title="@string/menu_edit">
+    <!-- Edit -->
+    <item
+        android:id="@+id/menu_edit"
+        android:title="@string/menu_edit">
         <menu>
             <item
                 android:id="@+id/action_undo"
@@ -51,14 +55,6 @@
                 android:id="@+id/action_clear"
                 android:title="@string/menu_clear"
                 app:showAsAction="never" />
-            <item
-                android:id="@+id/action_Coding"
-                android:title="@string/menu_Coding"
-                app:showAsAction="never" />
-            <item
-                android:id="@+id/action_Uncoding"
-                android:title="@string/menu_Uncoding"
-                app:showAsAction="never" />
         </menu>
     </item>
 
@@ -67,8 +63,10 @@
         android:id="@+id/action_settings"
         android:title="@string/menu_settings"
         app:showAsAction="never" />
+
     <item
         android:id="@+id/action_about"
         android:title="@string/menu_about"
         app:showAsAction="never" />
+
 </menu>
