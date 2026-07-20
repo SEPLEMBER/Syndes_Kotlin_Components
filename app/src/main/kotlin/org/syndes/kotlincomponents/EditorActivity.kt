@@ -42,7 +42,6 @@ import android.widget.TextView
 
 class EditorActivity : AppCompatActivity() {
 
-```
 private lateinit var binding: ActivityEditorBinding
 
 // SAF launchers
