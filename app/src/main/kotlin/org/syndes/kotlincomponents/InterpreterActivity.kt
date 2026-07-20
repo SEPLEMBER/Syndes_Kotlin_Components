@@ -253,9 +253,14 @@ class InterpreterActivity : AppCompatActivity() {
             }
         })
 
-        globals.set("check", object : TwoArgFunction() {
-            override fun call(condition: LuaValue, valueIfTrue: LuaValue): LuaValue {
-                return if (condition.toboolean()) valueIfTrue else LuaValue.ZERO
+        // ✅ ИСПРАВЛЕНИЕ: Заменяем сломанную функцию 'check' на математически корректную 'clamp'
+        // Она ограничивает значение диапазоном [min, max], не затирая исходные данные, если они в норме.
+        globals.set("clamp", object : ThreeArgFunction() {
+            override fun call(value: LuaValue, min: LuaValue, max: LuaValue): LuaValue {
+                val v = value.todouble()
+                val mn = min.todouble()
+                val mx = max.todouble()
+                return LuaValue.valueOf(Math.max(mn, Math.min(mx, v)))
             }
         })
 
