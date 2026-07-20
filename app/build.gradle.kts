@@ -11,14 +11,14 @@ android {
         applicationId = "org.syndes.kotlincomponents"
         minSdk = 26
         targetSdk = 34
-        versionCode = 3
-        versionName = "1.6"
+        versionCode = 2
+        versionName = "0.9"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = true // Включен R8 для оптимизации
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -52,6 +52,7 @@ dependencies {
 
     implementation(libs.coroutines.core)
     implementation(libs.coroutines.android)
+    implementation("org.luaj:luaj-jse:3.0.1")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
