@@ -54,6 +54,11 @@
             android:exported="false"
             android:theme="@style/AppTheme" />
 
+                <activity
+            android:name=".InterpreterActivity"
+            android:exported="true"
+            android:theme="@style/AppTheme" />
+
         <activity
             android:name=".RustStartActivity"
             android:exported="true"
