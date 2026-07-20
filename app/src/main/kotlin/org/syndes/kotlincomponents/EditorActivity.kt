@@ -1324,8 +1324,6 @@ fun performRedo() {
     scheduleHighlight()
 }
 
-}
-
     // ---------- SETTINGS (fallback) ----------
     private fun showSettingsFallbackDialog() {
         val sp = getSharedPreferences(prefsName, Context.MODE_PRIVATE)
