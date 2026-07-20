@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#0A0A0A"
+    android:padding="16dp">
+
+    <!-- Заголовок -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Интерпретатор языка LUA"
+        android:textColor="#00FFFF"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:paddingBottom="16dp"/>
+
+    <!-- Поле ввода кода -->
+    <EditText
+        android:id="@+id/etCode"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:hint="-- Введи Lua код здесь\nprint('Привет, мир!')"
+        android:textColor="#00FFFF"
+        android:textColorHint="#66FFFF"
+        android:backgroundTint="#00FFFF"
+        android:fontFamily="monospace"
+        android:textSize="14sp"
+        android:gravity="top|start"
+        android:inputType="textMultiLine"
+        android:freezesText="false"
+        android:saveEnabled="false"
+        android:scrollbars="vertical"/>
+
+    <!-- Кнопки управления -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp">
+
+        <Button
+            android:id="@+id/btnRun"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="▶ ВЫПОЛНИТЬ"
+            android:textColor="#00FFFF"
+            android:backgroundTint="#1A1A1A"
+            android:layout_marginEnd="4dp"/>
+
+        <Button
+            android:id="@+id/btnClear"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="🗑 ОЧИСТИТЬ"
+            android:textColor="#00FFFF"
+            android:backgroundTint="#1A1A1A"
+            android:layout_marginStart="4dp"/>
+
+    </LinearLayout>
+
+    <!-- Поле вывода -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#1A1A1A"
+        android:padding="8dp">
+
+        <TextView
+            android:id="@+id/tvOutput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Вывод появится здесь..."
+            android:textColor="#00FF00"
+            android:fontFamily="monospace"
+            android:saveEnabled="false"
+            android:freezesText="false"
+            android:textSize="14sp"/>
+
+    </ScrollView>
+
+    <!-- Примеры -->
+    <Button
+        android:id="@+id/btnExample"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="📋 ЗАГРУЗИТЬ ПРИМЕР"
+        android:textColor="#00FFFF"
+        android:backgroundTint="#1A1A1A"
+        android:layout_marginTop="8dp"/>
+
+</LinearLayout>
