@@ -1,5 +1,5 @@
 # Syndes KComponents 
-
+ 
 Syndes Kotlin Components is a part of the Syndes Android environment.
 It represents a single Android application that contains multiple tools implemented as separate activities.
 
